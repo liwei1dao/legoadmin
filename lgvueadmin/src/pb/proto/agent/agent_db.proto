@@ -1,0 +1,18 @@
+syntax = "proto3";
+option go_package = ".;pb";
+import "enum.proto";
+
+//代理列表
+message DBAgent{
+    string agentid = 1;     //@go_tags(`bson:"_id"`) 代理Id
+    string agentkey = 2;    //代理加密Key
+    Currency currency = 3;  //代理货币
+    string addrurl = 4;     //回调地址
+}
+
+//游戏列表
+message DBGames {
+    string gameid = 1;                  //@go_tags(`bson:"_id"`) 游戏Id
+    map<string,string> gamename = 2;    //游戏名称 多语言版本
+    string gameurl = 3;                 //游戏地址
+}

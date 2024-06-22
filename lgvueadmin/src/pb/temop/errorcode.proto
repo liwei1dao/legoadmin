@@ -1,0 +1,30 @@
+syntax = "proto3";
+option go_package = ".;pb";
+
+enum ErrorCode {
+  Success = 0;                  //成功
+  GatewayException = 1;         //网关执行异常
+  NoFindService = 10;           //没有找到远程服务器
+  NoFindServiceHandleFunc = 11; //远程服务器未找到执行方法
+  RpcFuncExecutionError = 12;   //Rpc方法执行错误
+  CacheReadError = 13;          //缓存读取失败
+  SqlExecutionError = 14;       //数据库执行错误
+  ReqParameterError = 15;       //请求参数错误
+  SignError = 16;               //签名串错误
+  InsufficientPermissions = 17; //权限不足
+  NoLogin = 18;                 //未登录
+  UserSessionNobeing = 19;      //用户不存在
+  StateInvalid = 20;            //无效状态
+  DBError = 21;                 //数据库操作失败
+  SystemError = 22;             //通用错误
+  DecodeError = 23;             //加密串解码错误
+  TimestampTimeout = 24;        //加密串时间戳超时
+  PbError = 25;                 //pb错误
+  AgentUidEmpty = 26;           //AgentUid空
+  Exception = 100;              //程序执行异常
+
+
+  //api 相关错误码
+  AgentIdUnregistered = 1001;  //代理未注册
+  AgentSignError = 1002;   //代理签名错误
+}

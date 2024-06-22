@@ -1,10 +1,12 @@
 <template>
     <v-container fluid>
-
+        <button @click="serializeData">Serialize Data</button>
+        <button @click="deserializeData">Deserialize Data</button>
     </v-container>
 </template>
 
 <script>
+const { AgentMessage } = require('@/pb/js/comm_pb');
 import { inject } from 'vue';
 import {useStore} from "vuex"
 export default {
@@ -34,9 +36,18 @@ export default {
                 commit("product/adds", resp.products)  //commit 提交数据
             })
         },
-        addnewproduct(){
-
-        }
+        serializeData() {
+            const message = new AgentMessage();
+            message.setMsgname('test/liwei1dao');
+            this.serializedData = message.serializeBinary();
+            console.log('Serialized data:', this.serializedData);
+        },
+        deserializeData() {
+            if (this.serializedData) {
+                const message1 = AgentMessage.deserializeBinary(this.serializedData);
+                console.log('Deserialized data:', message1.toObject());
+            } 
+        },
     }
 }
 </script>

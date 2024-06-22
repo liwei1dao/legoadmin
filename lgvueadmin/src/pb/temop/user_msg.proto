@@ -1,0 +1,45 @@
+syntax = "proto3";
+option go_package = ".;pb";
+import "errorcode.proto";
+import "enum.proto";
+import "user_db.proto";
+
+//用户登录 
+message UserLoginReq {
+  string params = 1; //登录密文
+}
+
+//游戏登录数据
+message UserLoginData {
+  string buildid = 1;       //第三方id
+  string gameid = 2;        //请求游戏id
+  Language language = 3;    //语言
+  string agentid = 4;       //代理id
+}
+
+message UserLoginResp {
+  DBUser data = 1;
+}
+
+// 获取用户信息
+message UserInfoReq {}
+
+message UserInfoResp {
+  DBUser data = 1;
+}
+
+//登出
+message UserLogoutReq {}
+
+message UserLogoutResp {}
+
+//注册
+message UserRegisterReq {
+  string account = 1;
+  string sid = 2;
+}
+
+message UserRegisterResp {
+  ErrorCode Code = 1;
+  string account = 2;
+}

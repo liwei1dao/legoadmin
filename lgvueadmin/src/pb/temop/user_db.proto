@@ -1,0 +1,12 @@
+syntax = "proto3";
+option go_package = ".;pb";
+
+message DBUser {
+  string uid = 1;      //@go_tags(`bson:"_id"`) 用户ID
+  string platform = 2; //平台
+  string binduid = 3;  //玩家账号
+  string createip = 5; //创建账号时的ip
+  int64 ctime = 6;     //玩家创号时间戳
+  int64 logintime = 7; //最后一次登录时间
+  double balance = 8;  //余额
+}

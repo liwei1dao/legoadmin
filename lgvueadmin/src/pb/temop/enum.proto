@@ -1,0 +1,19 @@
+syntax = "proto3";
+option go_package = ".;pb";
+
+//RPC 协议类型
+enum RpcProtoType {
+    ProtoBuff = 0;   
+    Json = 1;
+}
+
+enum Currency {
+    CurrencyNull = 0;
+    CNY = 1;        //人民币 
+}
+
+enum Language {
+    LanguageNull = 0;
+    CN = 1;         //中文
+    EN = 2;         //英文
+}

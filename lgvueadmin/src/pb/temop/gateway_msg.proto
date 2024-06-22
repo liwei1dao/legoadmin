@@ -1,0 +1,36 @@
+syntax = "proto3";
+option go_package = ".;pb";
+import "comm.proto";
+import "errorcode.proto";
+import "google/protobuf/any.proto";
+
+message GatewayAgentReq {
+    string agentid = 1;
+    string params = 2;
+    string sign = 3;
+}
+
+message GatewayAgentResp {
+    ErrorCode code = 1; //@go_tags(`json:"code"`)
+    string message = 2;
+    string data = 3;
+}
+
+//网关心跳 请求
+message GatewayHeartbeatReq {
+
+}
+
+//网关心跳 请求回应
+message GatewayHeartbeatResp {
+    int64 timestamp = 1;
+}
+
+
+//统一错误码推送
+message GatewayErrorNotifyPush {
+    string MsgName = 1;             //消息id 客户端标记
+    string ServicePath = 2;         //消息路由
+    google.protobuf.Any Req = 3;    //参数信息
+    ErrorData Err = 4;              //错误数据
+}

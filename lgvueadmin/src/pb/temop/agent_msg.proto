@@ -1,0 +1,34 @@
+syntax = "proto3";
+option go_package = ".;pb";
+import "enum.proto";
+
+//代理密文请求数据结构
+message ProxyReq {
+    string agentid = 1;
+    string params = 2;
+    string sign = 3;
+}
+
+//代理登录请求
+message AgentLoginReq {
+    string account = 1;
+    string gameid = 2;
+    Language language = 3;
+}
+message AgentLoginResp {
+    string url = 1;
+}
+
+//代理认证请求
+message AgentAuthReq {
+    string account = 1;
+    string currency = 2;
+    string gameid = 3;
+    int64 ts = 4;
+}
+
+message AgentAuthResp {
+    int32 code = 1;
+    string message = 2;
+    double balance = 3;
+}
