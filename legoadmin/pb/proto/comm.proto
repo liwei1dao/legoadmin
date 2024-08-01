@@ -1,6 +1,5 @@
 syntax = "proto3";
 option go_package = ".;pb";
-import "enum.proto";
 import "errorcode.proto";
 import "google/protobuf/any.proto";
 
@@ -34,9 +33,8 @@ message UserSessionData{
 //代理用户转发消息结构
 message AgentMessage {
   string MsgName = 1;
-  RpcProtoType ProtoType = 2;
-  UserSessionData UserSession = 3;
-  google.protobuf.Any Message = 4;
+  UserSessionData UserSession = 2;
+  google.protobuf.Any Message = 3;
 }
 
 // RPC 服务固定回复结构
