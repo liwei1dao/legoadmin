@@ -1,0 +1,19 @@
+# 游戏数据卷
+volumes:
+  redisdata:
+    name: redisdata
+
+# 服务
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: /etc/redis/redis.conf
+    volumes:
+      # 持久存储redis的数据
+      - redisdata:/data
+      # 挂载本地配置文件
+      - ./redis.conf:/etc/redis/redis.conf

@@ -1,0 +1,95 @@
+syntax = "proto3";
+option go_package = ".;pb";
+import "enum.proto";
+import "errorcode.proto";
+import "google/protobuf/any.proto";
+
+message ErrorData {
+  ErrorCode Code = 1;
+  string Message = 2;
+  double Balance = 3;
+}
+
+//集合包
+message MessagePackage {
+  repeated UserMessage Messages = 1;
+}
+
+//用户消息流结构1
+message UserMessage {
+  string MsgName = 1;                 //消息id 客户端标记
+  string ServicePath = 2;             //消息路由地址 部分消息前端确定转发给谁 \worker\worker0
+  google.protobuf.Any Data = 3;
+  bytes Json = 4;
+}
+
+message UserSessionData{
+  string SessionId = 1;
+  string UserId = 2;
+  string Ip = 3;
+  string ServiceTag = 4;
+  string GatewayId = 5;
+}
+
+//代理用户转发消息结构
+message AgentMessage {
+  string MsgName = 1;
+  RpcProtoType ProtoType = 2;
+  UserSessionData UserSession = 3;
+  google.protobuf.Any Message = 4;
+}
+
+// RPC 服务固定回复结构
+message RPCMessageReply {
+  string ServicePath = 1;
+  ErrorData ErrorData = 2;
+  repeated UserMessage Reply = 3;
+}
+
+// RPC 服务固定回复结构
+message RPCHttpMessageReply {
+  string ServicePath = 1;
+  ErrorData ErrorData = 2;
+  google.protobuf.Any Data = 3;
+}
+
+//用户代理绑定Uid请求
+message AgentBuildReq {
+  string UserSessionId = 1;
+  string UserId = 2;
+  string WorkerId = 3;
+}
+//用户代理解绑请求
+message AgentUnBuildReq { string UserSessionId = 1; }
+
+//向用户代理发送消息请求
+message AgentSendMessageReq {
+  string UserSessionId = 1;
+  repeated UserMessage Reply = 2;
+}
+
+//发送批量消息
+message BatchMessageReq {
+  repeated string UserSessionIds = 1;
+  string MsgName = 2;
+  google.protobuf.Any Data = 3;
+}
+//发送批量消息
+message BatchMessagesReq {
+  string MsgName = 1;
+  map<string,google.protobuf.Any> Data = 2;
+}
+//发送批量消息
+message BatchUsersMessageReq {
+  repeated string uids = 1;
+  string MsgName = 2;
+  google.protobuf.Any Data = 3;
+}
+//发送广播消息
+message BroadCastMessageReq {
+  string MsgName = 1;
+  google.protobuf.Any Data = 2;
+}
+
+//关闭用户代理
+message AgentCloseeReq { string UserSessionId = 1; }

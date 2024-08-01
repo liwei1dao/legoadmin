@@ -1,0 +1,18 @@
+{
+    "window.zoomLevel": 1,
+    "go.docsTool": "gogetdoc",
+    "go.formatTool": "goimports",
+    "explorer.confirmDelete": false,
+    "go.lintFlags": [
+        "--disable=varcheck",
+        "--enable=errcheck"
+    ],
+    "files.exclude": {
+        "*-template/": true
+    },
+    "protoc": {
+        "options": [
+            "--proto_path=../pb/proto"
+        ]
+    }
+}

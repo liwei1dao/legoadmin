@@ -1,0 +1,22 @@
+# 游戏数据卷
+volumes:
+  mongodata:
+    name: mongodata
+
+# 服务
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongodb/mongod.conf:/etc/mongo/mongod.conf:rw
+      - ./mongodb/initdb.d/:/docker-entrypoint-initdb.d/ #设置容器启动脚本
+      - mongodata:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=nicetoo1997
+      - MONGO_INITDB_DATABASE=admin
+
