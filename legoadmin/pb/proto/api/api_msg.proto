@@ -1,2 +1,14 @@
 syntax = "proto3";
 option go_package = ".;pb";
+import "enum.proto";
+
+message ApiLoginReq {
+    string account = 1;
+    string password = 2;
+}
+
+message ApiLoginResp {
+    string account = 1;     //@go_tags(`json:"account"`)
+    Identity identity = 2;  //@go_tags(`json:"identity"`)
+    string token = 4;       //@go_tags(`json:"token"`)
+}

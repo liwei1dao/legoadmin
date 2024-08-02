@@ -17,6 +17,6 @@ enum ErrorCode {
   StateInvalid = 20;            //无效状态
   DBError = 21;                 //数据库操作失败
   SystemError = 22;             //通用错误
-  
+  TokenInvalid = 23;            //token 是空
 
 }

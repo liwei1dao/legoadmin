@@ -4,7 +4,7 @@ import (
 	"legoadmin/modules"
 	"legoadmin/pb"
 	"net/http"
-	"sync"
+	"reflect"
 
 	"github.com/liwei1dao/lego/base"
 
@@ -17,6 +17,11 @@ const (
 	Msg_UserLogin          string = "user/login"          //用户登录协议
 )
 
+var (
+	gatewayReqTyoe, gatewayRespTyoe reflect.Type = reflect.TypeOf(&pb.Rpc_GatewayRouteReq{}), reflect.TypeOf(&pb.Rpc_GatewayRouteResp{})
+	httpReqTyoe, httpRespTyoe       reflect.Type = reflect.TypeOf(&pb.Rpc_GatewayHttpRouteReq{}), reflect.TypeOf(&pb.Rpc_GatewayHttpRouteResp{})
+)
+
 type (
 	// IAgent 用户代理对象接口定义
 	IAgent interface {
@@ -25,6 +30,7 @@ type (
 		UserId() string
 		IP() string
 		GetSessionData() *pb.UserSessionData
+		UnBuild()
 		WriteMsgs(msgs ...*pb.UserMessage) (err error)
 		WriteBytes(data []byte) (err error)
 		HandleMessage(msg *pb.UserMessage) (err error)
@@ -45,53 +51,6 @@ type (
 		Data    interface{}  `json:"data"`
 	}
 )
-
-var msgPool = &sync.Pool{
-	New: func() interface{} {
-		return &pb.AgentMessage{
-			UserSession: &pb.UserSessionData{},
-		}
-	},
-}
-
-func getmsg() *pb.AgentMessage {
-	req := msgPool.Get().(*pb.AgentMessage)
-	return req
-}
-
-func putmsg(r *pb.AgentMessage) {
-	msgPool.Put(r)
-}
-
-var msgreplyPool = &sync.Pool{
-	New: func() interface{} {
-		return &pb.RPC_Gateway_UserMessageReply{}
-	},
-}
-
-func getmsgreply() *pb.RPC_Gateway_UserMessageReply {
-	reply := msgreplyPool.Get().(*pb.RPC_Gateway_UserMessageReply)
-	return reply
-}
-
-func putmsgreply(r *pb.RPC_Gateway_UserMessageReply) {
-	msgreplyPool.Put(r)
-}
-
-var httpreplyPool = &sync.Pool{
-	New: func() interface{} {
-		return &pb.RPCHttpMessageReply{}
-	},
-}
-
-func gethttpreply() *pb.RPCHttpMessageReply {
-	reply := httpreplyPool.Get().(*pb.RPCHttpMessageReply)
-	return reply
-}
-
-func puthttpreply(r *pb.RPCHttpMessageReply) {
-	httpreplyPool.Put(r)
-}
 
 // 设置跨域
 func cors() engine.HandlerFunc {

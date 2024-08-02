@@ -1,27 +1,58 @@
 package comm
 
-import "github.com/liwei1dao/lego/core"
+import (
+	"context"
+	"legoadmin/pb"
+	"reflect"
 
-// 模块名定义处
-const (
-	ModuleGate core.M_Modules = "gateway" //gate模块 网关服务模块
-
+	"github.com/golang-jwt/jwt"
+	"github.com/liwei1dao/lego/base"
+	"github.com/liwei1dao/lego/core"
+	"google.golang.org/protobuf/proto"
 )
 
-// RPC服务接口定义处
-const ( //Rpc
-	//Gateway 网关消息
-	Rpc_GatewayRoute               core.Rpc_Key = "Rpc_GatewayRoute"               //网关路由
-	Rpc_GatewayHttpRoute           core.Rpc_Key = "Rpc_GatewayHttpRoute"           //Http网关路由
-	Rpc_GatewayAgentUnBind         core.Rpc_Key = "Rpc_GatewayAgentUnBind"         //代理解绑 解绑用户Id
-	Rpc_GatewayAgentSendMsg        core.Rpc_Key = "Rpc_GatewayAgentSendMsg"        //代理发送消息 向用户发送消息
-	Rpc_GatewaySendBatchMsg        core.Rpc_Key = "Rpc_GatewaySendBatchMsg"        //向多个用户发送消息
-	Rpc_GatewaySendBatchMsgByUid   core.Rpc_Key = "Rpc_GatewaySendBatchMsgByUid"   //向多个用户发送消息 查询uid
-	Rpc_GatewaySendRadioMsg        core.Rpc_Key = "Rpc_GatewaySendRadioMsg"        //广播消息
-	Rpc_GatewaySendRadioMsgByGroup core.Rpc_Key = "Rpc_GatewaySendRadioMsgByGroup" //广播消息到组
-	Rpc_GatewayAgentClose          core.Rpc_Key = "Rpc_GatewayAgentClose"          //代理关闭 关闭用户连接
-	Rpc_GatewayNoticeUserLogin     core.Rpc_Key = "Rpc_NoticeUserLogin"            //通知用户登录
-	Rpc_GatewayNoticeUserCreate    core.Rpc_Key = "Rpc_NoticeUserCreate"           //通知用户创角
-	Rpc_GatewayNoticeUserClose     core.Rpc_Key = "Rpc_NoticeUserClose"            //通知用户离线
+type IService interface {
+	base.IRPCXService
+	GetUserSession(cache *pb.UserSessionData) (session IUserSession)
+	PutUserSession(session IUserSession)
+}
 
-)
+// 服务网关组件接口定义
+type ISC_GateRouteComp interface {
+	core.IServiceComp
+	Rpc_GatewayRoute(ctx context.Context, args *pb.Rpc_GatewayRouteReq, reply *pb.Rpc_GatewayRouteResp) error
+	RegisterRoute(methodName string, comp reflect.Value, msg reflect.Type, handle reflect.Method)
+}
+
+// 服务网关组件接口定义
+type ISC_HttpRouteComp interface {
+	core.IServiceComp
+	Rpc_GatewayHttpRoute(ctx context.Context, args *pb.Rpc_GatewayHttpRouteReq, reply *pb.Rpc_GatewayHttpRouteResp) error
+	RegisterRoute(methodName string, comp reflect.Value, msg reflect.Type, handle reflect.Method)
+}
+
+// 用户会话
+type IUserSession interface {
+	SetSession(service IService, cache *pb.UserSessionData)
+	GetCache() *pb.UserSessionData
+	GetUserId() string
+	UnBind() (err error)
+	SendMsg(mainType, subType string, msg proto.Message) (err error)
+	Polls() []*pb.UserMessage
+	Push() (err error)       //警告 api传递过来的会话禁用此接口
+	SyncPush() (err error)   //警告 api传递过来的会话禁用此接口 同步
+	SetOffline(offline bool) //设置离线状态
+	GetOffline() bool        //设置离线状态
+	Close() (err error)
+	Reset()
+	SetMate(name string, value interface{})
+	GetMate(name string) (ok bool, value interface{})
+	Clone() (session IUserSession) //克隆
+}
+
+// Claims struct to define JWT claims
+type TokenClaims struct {
+	Account  string      `json:"account"`
+	Identity pb.Identity `json:"identity"`
+	jwt.StandardClaims
+}

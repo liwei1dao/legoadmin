@@ -1,27 +1,109 @@
 syntax = "proto3";
 option go_package = ".;pb";
 import "comm.proto";
+import "google/protobuf/any.proto";
 
 message RPC_EmptyReq {}
 message RPC_EmptyResp {}
 
 
-//向用户代理发送消息请求
-message RPC_Gateway_SendMessageReq {
-    string UserSessionId = 1;
-    repeated UserMessage Reply = 2;
+// RPC向用户代理发送消息请求
+message Rpc_GatewayRouteReq {
+    string MsgName = 1;
+    UserSessionData UserSession = 3;
+    google.protobuf.Any Message = 4;
 }
 
-
-// RPC 服务固定回复结构
-message RPC_Gateway_UserMessageReply {
+// RPC服务固定回复结构
+message Rpc_GatewayRouteResp {
     string ServicePath = 1;
     ErrorData ErrorData = 2;
     repeated UserMessage Reply = 3;
 }
-  
+
+// RPC向用户代理发送消息
+message Rpc_GatewayAgentSendMsgReq {
+    string UserSessionId = 1;
+    repeated UserMessage Reply = 2;
+}
+message Rpc_GatewayAgentSendMsgResp {
+    ErrorData ErrorData = 1;
+}
+
+//RPC向多用户代理发送消息
+message Rpc_GatewaySendBatchMsgReq {
+    repeated string UserSessionIds = 1;
+    string MsgName = 2;
+    google.protobuf.Any Data = 3;
+}
+message Rpc_GatewaySendBatchMsgResp {
+    ErrorData ErrorData = 1;
+}
+
+//发送批量消息
+message Rpc_GatewaySendBatchMsgsReq {
+    string MsgName = 1;
+    map<string,google.protobuf.Any> Data = 2;
+}
+//发送批量消息
+message Rpc_GatewaySendBatchMsgsResp {
+    ErrorData ErrorData = 1;
+}
+
+//广播消息
+message Rpc_GatewaySendRadioMsgReq {
+    string MsgName = 1;
+    google.protobuf.Any Data = 2;
+}
+
+//广播消息
+message Rpc_GatewaySendRadioMsgResp {
+
+}
+
+//向目标用户发送消息
+message Rpc_GatewaySendBatchMsgByUidReq {
+    string MsgName = 1;
+    repeated string uids = 2;
+    google.protobuf.Any Data = 3;
+}
+
+message Rpc_GatewaySendBatchMsgByUidResp {
+
+}
+
+//关闭用户代理
+message Rpc_GatewayAgentCloseReq {
+     string UserSessionId = 1;
+}
+message Rpc_GatewayAgentCloseResp {
+
+}
+
+//用户代理解绑账号
+message Rpc_GatewayAgentUnBindReq {
+    string UserSessionId = 1;
+}
+message Rpc_GatewayAgentUnBindResp {
+
+}
 
 //通知用户离线
 message RPC_Gateway_NoticeUserCloseReq {
     UserSessionData UserSession = 1;
+}
+message RPC_Gateway_NoticeUserCloseResp {
+
+}
+
+//网关Http 路由请求
+message Rpc_GatewayHttpRouteReq {
+    string MsgName = 1;
+    string UserId = 2;
+    bytes Message = 3;
+}
+
+message Rpc_GatewayHttpRouteResp {
+    ErrorData ErrorData = 1;
+    google.protobuf.Any Data = 2;
 }

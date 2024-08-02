@@ -22,7 +22,7 @@ type Gateway struct {
 	options   *Options
 	service   base.IRPCXService //rpcx服务接口 主要client->server
 	agents    *AgentMgrComp     //客户端websocket连接管理
-	wsservice *WSServiceComp    //websocket服务 监听websocket连接
+	wsservice *ginComp          //websocket服务 监听websocket连接
 }
 
 // GetType 获取模块服务类型
@@ -62,6 +62,8 @@ func (this *Gateway) Start() (err error) {
 		string(comm.Rpc_GatewaySendBatchMsgByUid): this.agents.SendMsgToUsers,
 		// 关闭用户socket连接接口
 		string(comm.Rpc_GatewayAgentClose): this.agents.CloseAgent,
+		// 关闭用户socket连接接口
+		string(comm.Rpc_GatewayAgentUnBind): this.agents.CloseAgent,
 	}
 	for name, fn := range _name2Func {
 		this.service.RegisterFunctionName(name, fn)
@@ -76,7 +78,7 @@ func (this *Gateway) Start() (err error) {
 func (this *Gateway) OnInstallComp() {
 	this.ModuleBase.OnInstallComp()
 	this.agents = this.RegisterComp(new(AgentMgrComp)).(*AgentMgrComp)
-	this.wsservice = this.RegisterComp(new(WSServiceComp)).(*WSServiceComp)
+	this.wsservice = this.RegisterComp(new(ginComp)).(*ginComp)
 }
 
 // Connect 有新的连接对象进入

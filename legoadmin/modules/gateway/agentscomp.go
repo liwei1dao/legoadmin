@@ -89,21 +89,21 @@ func (this *AgentMgrComp) Logined(a IAgent) {
 }
 
 // SendMsgToAgent 向用户发送消息
-func (this *AgentMgrComp) SendMsgToAgent(ctx context.Context, args *pb.RPC_Gateway_SendMessageReq, reply *pb.RPC_Gateway_UserMessageReply) error {
+func (this *AgentMgrComp) SendMsgToAgent(ctx context.Context, args *pb.Rpc_GatewayAgentSendMsgReq, reply *pb.Rpc_GatewayAgentSendMsgResp) error {
 	this.module.Debugf("SendMsgToAgent: agent:%s msg:%v", args.UserSessionId, args.Reply)
 	if a, ok := this.agents.Load(args.UserSessionId); ok {
 		a.(IAgent).WriteMsgs(args.Reply...)
 	} else {
 		reply.ErrorData = &pb.ErrorData{
 			Code:    pb.ErrorCode_UserSessionNobeing,
-			Message: fmt.Sprintf("解绑SessionId:%s失败!", args.UserSessionId),
+			Message: fmt.Sprintf("用户:%s 不存在了!", args.UserSessionId),
 		}
 	}
 	return nil
 }
 
 // SendMsgToAgents 向多个户发送消息
-func (this *AgentMgrComp) SendMsgToAgents(ctx context.Context, args *pb.BatchMessageReq, reply *pb.RPC_Gateway_UserMessageReply) (err error) {
+func (this *AgentMgrComp) SendMsgToAgents(ctx context.Context, args *pb.Rpc_GatewaySendBatchMsgReq, reply *pb.Rpc_GatewaySendBatchMsgResp) (err error) {
 	var (
 		data []byte
 	)
@@ -131,7 +131,7 @@ func (this *AgentMgrComp) SendMsgToAgents(ctx context.Context, args *pb.BatchMes
 	return nil
 }
 
-func (this *AgentMgrComp) SendMsgsToAgents(ctx context.Context, args *pb.BatchMessagesReq, reply *pb.RPC_Gateway_UserMessageReply) (err error) {
+func (this *AgentMgrComp) SendMsgsToAgents(ctx context.Context, args *pb.Rpc_GatewaySendBatchMsgsReq, reply *pb.Rpc_GatewaySendBatchMsgsResp) (err error) {
 	var (
 		data []byte
 	)
@@ -163,7 +163,7 @@ func (this *AgentMgrComp) SendMsgsToAgents(ctx context.Context, args *pb.BatchMe
 }
 
 // SendMsgToAllAgent 向所有户发送消息
-func (this *AgentMgrComp) SendMsgToAllAgent(ctx context.Context, args *pb.BroadCastMessageReq, reply *pb.RPC_Gateway_UserMessageReply) (err error) {
+func (this *AgentMgrComp) SendMsgToAllAgent(ctx context.Context, args *pb.Rpc_GatewaySendRadioMsgReq, reply *pb.Rpc_GatewaySendRadioMsgResp) (err error) {
 	var (
 		data []byte
 	)
@@ -186,7 +186,7 @@ func (this *AgentMgrComp) SendMsgToAllAgent(ctx context.Context, args *pb.BroadC
 }
 
 // SendMsgToAllAgent 向所有户发送消息
-func (this *AgentMgrComp) SendMsgToUsers(ctx context.Context, args *pb.BatchUsersMessageReq, reply *pb.RPC_Gateway_UserMessageReply) (err error) {
+func (this *AgentMgrComp) SendMsgToUsers(ctx context.Context, args *pb.Rpc_GatewaySendBatchMsgByUidReq, reply *pb.Rpc_GatewaySendBatchMsgByUidResp) (err error) {
 	var (
 		data []byte
 	)
@@ -210,18 +210,21 @@ func (this *AgentMgrComp) SendMsgToUsers(ctx context.Context, args *pb.BatchUser
 }
 
 // CloseAgent 关闭某个用户
-func (this *AgentMgrComp) CloseAgent(ctx context.Context, args *pb.AgentCloseeReq, reply *pb.RPC_Gateway_UserMessageReply) error {
+func (this *AgentMgrComp) UnBuildAgent(ctx context.Context, args *pb.Rpc_GatewayAgentCloseReq, reply *pb.Rpc_GatewayAgentCloseResp) error {
+	if a, ok := this.agents.Load(args.UserSessionId); ok {
+		a.(IAgent).UnBuild()
+	}
+	return nil
+}
+
+// CloseAgent 关闭某个用户
+func (this *AgentMgrComp) CloseAgent(ctx context.Context, args *pb.Rpc_GatewayAgentCloseReq, reply *pb.Rpc_GatewayAgentCloseResp) error {
 	if a, ok := this.agents.Load(args.UserSessionId); ok {
 		if a.(IAgent).UserId() != "" {
 			this.users.Delete(a.(IAgent).UserId())
 		}
 		a.(IAgent).Close()
 		this.agents.Delete(args.UserSessionId)
-	} else {
-		reply.ErrorData = &pb.ErrorData{
-			Code:    pb.ErrorCode_UserSessionNobeing,
-			Message: fmt.Sprintf("解绑SessionId:%s失败!", args.UserSessionId),
-		}
 	}
 	return nil
 }

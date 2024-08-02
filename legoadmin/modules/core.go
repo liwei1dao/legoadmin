@@ -1,8 +1,23 @@
 package modules
 
 import (
+	"context"
+	"legoadmin/comm"
+	"legoadmin/pb"
+	"reflect"
+
+	"github.com/gogo/protobuf/proto"
 	"github.com/liwei1dao/lego/core"
 	"github.com/liwei1dao/lego/sys/log"
+)
+
+var (
+	typeOfSession   = reflect.TypeOf((*comm.IUserSession)(nil)).Elem()
+	typeOfMessage   = reflect.TypeOf((*proto.Message)(nil)).Elem()
+	typeOfErrorCode = reflect.TypeOf((*pb.ErrorCode)(nil)).Elem()
+	typeOfErrorData = reflect.TypeOf((*pb.ErrorData)(nil))
+	typeOfError     = reflect.TypeOf((*error)(nil)).Elem()
+	typeOfContext   = reflect.TypeOf((*context.Context)(nil)).Elem()
 )
 
 type (

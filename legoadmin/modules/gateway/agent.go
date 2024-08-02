@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/liwei1dao/lego/sys/log"
+	"github.com/liwei1dao/lego/sys/pools"
 
 	"github.com/gorilla/websocket"
 	"github.com/liwei1dao/lego/utils/container/id"
@@ -176,6 +177,10 @@ func (this *Agent) GetSessionData() *pb.UserSessionData {
 	}
 }
 
+func (this *Agent) UnBuild() {
+	this.uId = ""
+}
+
 func (this *Agent) WriteMsgs(msgs ...*pb.UserMessage) (err error) {
 	if atomic.LoadInt32(&this.state) != 1 {
 		return
@@ -234,13 +239,13 @@ func (this *Agent) HandleMessage(msg *pb.UserMessage) (err error) {
 // 分发用户消息
 func (this *Agent) messageDistribution(msg *pb.UserMessage) (err error) {
 	var (
-		spath string                           = this.spath
-		req   *pb.AgentMessage                 = getmsg()
-		reply *pb.RPC_Gateway_UserMessageReply = getmsgreply()
+		spath string                   = this.spath
+		req   *pb.Rpc_GatewayRouteReq  = pools.GetForType(gatewayReqTyoe).(*pb.Rpc_GatewayRouteReq)
+		reply *pb.Rpc_GatewayRouteResp = pools.GetForType(gatewayRespTyoe).(*pb.Rpc_GatewayRouteResp)
 	)
 	defer func() {
-		putmsg(req)
-		putmsgreply(reply)
+		pools.PutForType(gatewayReqTyoe, req)
+		pools.PutForType(gatewayRespTyoe, reply)
 	}()
 	req.UserSession.Ip = this.IP()
 	req.UserSession.SessionId = this.sessionId

@@ -6,7 +6,6 @@ import "google/protobuf/any.proto";
 message ErrorData {
   ErrorCode Code = 1;
   string Message = 2;
-  double Balance = 3;
 }
 
 //集合包
@@ -19,7 +18,6 @@ message UserMessage {
   string MsgName = 1;                 //消息id 客户端标记
   string ServicePath = 2;             //消息路由地址 部分消息前端确定转发给谁 \worker\worker0
   google.protobuf.Any Data = 3;
-  bytes Json = 4;
 }
 
 message UserSessionData{
@@ -30,54 +28,3 @@ message UserSessionData{
   string GatewayId = 5;
 }
 
-//代理用户转发消息结构
-message AgentMessage {
-  string MsgName = 1;
-  UserSessionData UserSession = 2;
-  google.protobuf.Any Message = 3;
-}
-
-
-// RPC 服务固定回复结构
-message RPCHttpMessageReply {
-  string ServicePath = 1;
-  ErrorData ErrorData = 2;
-  google.protobuf.Any Data = 3;
-}
-
-//用户代理绑定Uid请求
-message AgentBuildReq {
-  string UserSessionId = 1;
-  string UserId = 2;
-  string WorkerId = 3;
-}
-//用户代理解绑请求
-message AgentUnBuildReq { string UserSessionId = 1; }
-
-
-
-//发送批量消息
-message BatchMessageReq {
-  repeated string UserSessionIds = 1;
-  string MsgName = 2;
-  google.protobuf.Any Data = 3;
-}
-//发送批量消息
-message BatchMessagesReq {
-  string MsgName = 1;
-  map<string,google.protobuf.Any> Data = 2;
-}
-//发送批量消息
-message BatchUsersMessageReq {
-  repeated string uids = 1;
-  string MsgName = 2;
-  google.protobuf.Any Data = 3;
-}
-//发送广播消息
-message BroadCastMessageReq {
-  string MsgName = 1;
-  google.protobuf.Any Data = 2;
-}
-
-//关闭用户代理
-message AgentCloseeReq { string UserSessionId = 1; }

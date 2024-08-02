@@ -1,2 +1,9 @@
 syntax = "proto3";
 option go_package = ".;pb";
+import "enum.proto";
+
+message DBApiUser {
+    string account = 1;      //@go_tags(`gorm:"primary_key;autoIncrement"`) 账号
+    string password = 2;     //密码
+    Identity identity = 3;   //身份
+}

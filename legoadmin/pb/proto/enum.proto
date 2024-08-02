@@ -8,3 +8,9 @@ enum Language {
     CN = 1;         //中文
     EN = 2;         //英文
 }
+
+//身份
+enum Identity {
+    IdentityNull = 0;
+    Admin = 1;
+}
