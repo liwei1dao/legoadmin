@@ -33,7 +33,7 @@ type ISC_HttpRouteComp interface {
 
 // 用户会话
 type IUserSession interface {
-	SetSession(service IService, cache *pb.UserSessionData)
+	SetSession(ctx context.Context, service IService, cache *pb.UserSessionData)
 	GetCache() *pb.UserSessionData
 	GetUserId() string
 	IsOnline() bool
