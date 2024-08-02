@@ -60,6 +60,13 @@ func (this *UserSession) GetUserId() string {
 	return this.userCache.UserId
 }
 
+func (this *UserSession) IsOnline() bool {
+	if this.userCache.UserId == "" {
+		return false
+	}
+	return true
+}
+
 func (this *UserSession) SetOffline(offline bool) {
 	this.offline = offline
 }

@@ -36,6 +36,7 @@ type IUserSession interface {
 	SetSession(service IService, cache *pb.UserSessionData)
 	GetCache() *pb.UserSessionData
 	GetUserId() string
+	IsOnline() bool
 	UnBind() (err error)
 	SendMsg(mainType, subType string, msg proto.Message) (err error)
 	Polls() []*pb.UserMessage

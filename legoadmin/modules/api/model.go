@@ -20,7 +20,7 @@ func (this *modelComp) Init(service core.IService, module core.IModule, comp cor
 	this.ModuleCompBase.Init(service, module, comp, opt)
 	this.module = module.(*Api)
 
-	if err = db.AdminDB().CreateTable(comm.TableWebUser, &pb.DBApiUser{}); err != nil {
+	if err = db.MySql().CreateTable(comm.TableWebUser, &pb.DBApiUser{}); err != nil {
 		this.module.Errorln(err)
 		return
 	}
@@ -30,7 +30,7 @@ func (this *modelComp) Init(service core.IService, module core.IModule, comp cor
 		Identity: pb.Identity_Admin,
 	}
 	// 执行分页查询
-	db.AdminDB().Insert(comm.TableWebUser, model)
+	db.MySql().Insert(comm.TableWebUser, model)
 	return
 }
 
@@ -39,7 +39,7 @@ func (this *modelComp) getusers() (models []*pb.DBApiUser, err error) {
 
 	models = make([]*pb.DBApiUser, 0)
 	// 执行分页查询
-	err = db.AdminDB().Find(comm.TableWebUser, &models, db.M{})
+	err = db.MySql().Find(comm.TableWebUser, &models, db.M{})
 	if err != nil {
 		this.module.Errorln(err)
 		return
@@ -50,6 +50,6 @@ func (this *modelComp) getusers() (models []*pb.DBApiUser, err error) {
 // 查找账号
 func (this *modelComp) findByAccount(account string) (model *pb.DBApiUser, err error) {
 	model = &pb.DBApiUser{}
-	err = db.AdminDB().FindOne(comm.TableWebUser, model, db.M{"account": account})
+	err = db.MySql().FindOne(comm.TableWebUser, model, db.M{"account": account})
 	return
 }

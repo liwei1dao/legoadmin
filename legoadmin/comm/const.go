@@ -15,6 +15,7 @@ const (
 	ModuleGate  core.M_Modules = "gateway" //gate模块 网关服务模块
 	ModuleTimer core.M_Modules = "timer"   //定时任务模块
 	ModuleApi   core.M_Modules = "api"     //后台
+	ModuleUser  core.M_Modules = "user"    //用户模块
 )
 
 // 服务组件名称
@@ -52,4 +53,10 @@ const (
 //数据库表定义
 const (
 	TableWebUser = "webuser" //后台用户表
+	TableUser    = "user"    // 用户表
+)
+
+//session 缓存数据Key
+const (
+	Session_User = "user"
 )

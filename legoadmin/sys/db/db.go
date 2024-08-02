@@ -1,13 +1,8 @@
 package db
 
 import (
-	"context"
-	"crypto/tls"
-
-	"github.com/liwei1dao/lego/sys/log"
 	"github.com/liwei1dao/lego/sys/mysql"
-
-	"github.com/redis/go-redis/v9"
+	"github.com/liwei1dao/lego/sys/redis"
 )
 
 func newSys(options *Options) (sys *DB, err error) {
@@ -19,74 +14,34 @@ func newSys(options *Options) (sys *DB, err error) {
 }
 
 type DB struct {
-	options    *Options
-	admindb    mysql.ISys
-	adminredis redis.UniversalClient
-	gamedb     mysql.ISys
-	gameredis  redis.UniversalClient
+	options *Options
+	mysql   mysql.ISys
+	redis   redis.ISys
 }
 
 func (this *DB) init() (err error) {
-	rconf := &redis.UniversalOptions{
-		Addrs:    this.options.AdminRedisAddr,
-		Password: this.options.AdminRedisPassword, // 如果有密码
-		DB:       this.options.AdminRedisDB,
-	}
-	if this.options.AdminRedisTLS {
-		rconf.TLSConfig = &tls.Config{}
-	}
-	// 使用集群模式
-	this.adminredis = redis.NewUniversalClient(rconf)
-
-	_, err = this.adminredis.Ping(context.Background()).Result()
-	if err != nil {
-		this.options.Log.Error(err.Error(), log.Field{Key: "options", Value: this.options})
-		return
-	}
-	if this.admindb, err = mysql.NewSys(
-		mysql.SetMySQLDsn(this.options.AdminMysqlDNS),
+	if this.redis, err = redis.NewSys(
+		redis.SetRedisAddr(this.options.RedisAddr),
+		redis.SetRedisPassword(this.options.RedisPassword),
+		redis.SetRedisTLS(this.options.RedisTLS),
+		redis.SetRedisDB(this.options.RedisDB),
 	); err != nil {
-		this.options.Log.Error(err.Error(), log.Field{Key: "options", Value: this.options})
+		this.options.Log.Errorln(err)
 		return
 	}
-	if this.options.GameMysqlDNS != "" {
-		if this.gamedb, err = mysql.NewSys(
-			mysql.SetMySQLDsn(this.options.GameMysqlDNS),
-		); err != nil {
-			this.options.Log.Error(err.Error(), log.Field{Key: "options", Value: this.options})
-			return
-		}
-	}
-	if this.options.GameRedisAddr != nil && len(this.options.GameRedisAddr) > 0 {
-		gconf := &redis.UniversalOptions{
-			Addrs:    this.options.AdminRedisAddr,
-			Password: this.options.AdminRedisPassword, // 如果有密码
-			DB:       this.options.AdminRedisDB,
-		}
-		if this.options.GameRedisTLS {
-			gconf.TLSConfig = &tls.Config{}
-		}
-		// 使用集群模式
-		this.gameredis = redis.NewUniversalClient(gconf)
-
-		_, err = this.gameredis.Ping(context.Background()).Result()
-		if err != nil {
-			this.options.Log.Error(err.Error(), log.Field{Key: "options", Value: this.options})
-			return
-		}
+	if this.mysql, err = mysql.NewSys(
+		mysql.SetMySQLDsn(this.options.MysqlDNS),
+	); err != nil {
+		this.options.Log.Errorln(err)
+		return
 	}
 	return
 }
 
-func (this *DB) AdminDB() mysql.ISys {
-	return this.admindb
+func (this *DB) MySql() mysql.ISys {
+	return this.mysql
 }
-func (this *DB) GameDB() mysql.ISys {
-	return this.gamedb
-}
-func (this *DB) AdminRedis() redis.UniversalClient {
-	return this.adminredis
-}
-func (this *DB) GameRedis() redis.UniversalClient {
-	return this.gameredis
+
+func (this *DB) Redis() redis.ISys {
+	return this.redis
 }

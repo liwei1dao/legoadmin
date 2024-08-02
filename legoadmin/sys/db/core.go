@@ -5,8 +5,7 @@ import (
 	"time"
 
 	"github.com/liwei1dao/lego/sys/mysql"
-
-	"github.com/redis/go-redis/v9"
+	"github.com/liwei1dao/lego/sys/redis"
 )
 
 /*
@@ -16,11 +15,8 @@ import (
 type (
 	M    map[string]interface{}
 	ISys interface {
-		AdminDB() mysql.ISys
-		AdminRedis() redis.UniversalClient
-		GameDB() mysql.ISys
-		GameRedis() redis.UniversalClient
-		NewGameRedisMutex(key string, opt ...RMutexOption) (result *RedisMutex, err error)
+		MySql() mysql.ISys
+		Redis() redis.ISys
 	}
 
 	//过期数据
@@ -53,21 +49,9 @@ func NewSys(opt ...Option) (sys ISys, err error) {
 	return
 }
 
-func AdminDB() mysql.ISys {
-	return defsys.AdminDB()
+func MySql() mysql.ISys {
+	return defsys.MySql()
 }
-func AdminRedis() redis.UniversalClient {
-	return defsys.AdminRedis()
-}
-
-func GameDB() mysql.ISys {
-	return defsys.GameDB()
-}
-func GameRedis() redis.UniversalClient {
-	return defsys.GameRedis()
-}
-
-/*Lock*/
-func NewGameRedisMutex(key string, opt ...RMutexOption) (result *RedisMutex, err error) {
-	return defsys.NewGameRedisMutex(key, opt...)
+func Redis() redis.ISys {
+	return defsys.Redis()
 }

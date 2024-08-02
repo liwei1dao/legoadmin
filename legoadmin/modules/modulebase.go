@@ -1,6 +1,10 @@
 package modules
 
 import (
+	"fmt"
+	"legoadmin/comm"
+	"runtime"
+
 	"github.com/liwei1dao/lego/core"
 	"github.com/liwei1dao/lego/core/cbase"
 	"github.com/liwei1dao/lego/sys/log"
@@ -11,6 +15,7 @@ import (
 */
 type ModuleBase struct {
 	cbase.ModuleBase
+	service comm.IService
 	options IOptions
 }
 
@@ -20,12 +25,30 @@ func (this *ModuleBase) NewOptions() (options core.IModuleOptions) {
 
 // 模块初始化接口
 func (this *ModuleBase) Init(service core.IService, module core.IModule, options core.IModuleOptions) (err error) {
+	this.service = service.(comm.IService)
 	this.options = options.(IOptions)
 	this.SetName("module." + string(module.GetType()))
 	if err = this.ModuleBase.Init(service, module, options); err != nil {
 		return
 	}
 	return
+}
+
+// 异步调用用户处理流
+func (this *ModuleBase) AsynHandleSession(session comm.IUserSession, handle func(session comm.IUserSession)) {
+	defer func() { //程序异常 收集异常信息传递给前端显示
+		if r := recover(); r != nil {
+			buf := make([]byte, 4096)
+			l := runtime.Stack(buf, false)
+			err := fmt.Errorf("%v: %s", r, buf[:l])
+			log.Errorf("[AsynHandleSession] err:%s", err.Error())
+		}
+	}()
+	handle(session)
+	if session.IsOnline() {
+		session.Push()
+	}
+	this.service.PutUserSession(session)
 }
 
 // 日志
