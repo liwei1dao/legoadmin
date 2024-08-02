@@ -1,0 +1,27 @@
+syntax = "proto3";
+option go_package = ".;pb";
+import "comm.proto";
+
+message RPC_EmptyReq {}
+message RPC_EmptyResp {}
+
+
+//向用户代理发送消息请求
+message RPC_Gateway_SendMessageReq {
+    string UserSessionId = 1;
+    repeated UserMessage Reply = 2;
+}
+
+
+// RPC 服务固定回复结构
+message RPC_Gateway_UserMessageReply {
+    string ServicePath = 1;
+    ErrorData ErrorData = 2;
+    repeated UserMessage Reply = 3;
+}
+  
+
+//通知用户离线
+message RPC_Gateway_NoticeUserCloseReq {
+    UserSessionData UserSession = 1;
+}

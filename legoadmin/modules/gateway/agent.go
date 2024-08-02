@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"fmt"
+	"legoadmin/comm"
 	"legoadmin/pb"
 	"sync"
 	"sync/atomic"
@@ -75,12 +76,12 @@ locp:
 		} else {
 			this.wsConn.SetReadDeadline(time.Now().Add(time.Second * 60))
 			for _, msg := range msgpackage.Messages {
-				if msg.MsgName == comm.Msg_GatewayHeartbeat { //心跳消息 无需校验秘钥
+				if msg.MsgName == Msg_GatewayHeartbeat { //心跳消息 无需校验秘钥
 					data, _ := anypb.New(&pb.GatewayHeartbeatResp{
 						Timestamp: time.Now().Unix(),
 					})
 					this.WriteMsgs(&pb.UserMessage{
-						MsgName: comm.Msg_GatewayHeartbeat,
+						MsgName: Msg_GatewayHeartbeat,
 						Data:    data,
 					})
 					continue
@@ -101,36 +102,23 @@ locp:
 					continue
 				}
 
-				if this.gateway.IsGameOpen(msg.ServicePath) { //游戏是否开启
-					if err = this.messageDistribution(msg); err != nil {
-						this.gateway.Errorf("messageDistribution err:%v", err)
-						data, _ := anypb.New(&pb.GatewayErrorNotifyPush{
-							MsgName:     msg.MsgName,
-							ServicePath: msg.ServicePath,
-							Req:         msg.Data,
-							Err:         &pb.ErrorData{Code: pb.ErrorCode_GatewayException, Message: err.Error()},
-						})
-						err = this.WriteMsgs(&pb.UserMessage{
-							MsgName:     comm.Msg_GatewayHeartbeat,
-							ServicePath: msg.ServicePath,
-							Data:        data,
-						})
-						go this.Close()
-						break locp
-					}
-				} else {
+				if err = this.messageDistribution(msg); err != nil {
+					this.gateway.Errorf("messageDistribution err:%v", err)
 					data, _ := anypb.New(&pb.GatewayErrorNotifyPush{
 						MsgName:     msg.MsgName,
 						ServicePath: msg.ServicePath,
 						Req:         msg.Data,
-						Err:         &pb.ErrorData{Code: pb.ErrorCode_GameInMaintenance, Message: pb.ErrorCode_GameInMaintenance.String()},
+						Err:         &pb.ErrorData{Code: pb.ErrorCode_GatewayException, Message: err.Error()},
 					})
 					err = this.WriteMsgs(&pb.UserMessage{
-						MsgName:     "gateway/errornotify",
+						MsgName:     Msg_GatewayErrornotify,
 						ServicePath: msg.ServicePath,
 						Data:        data,
 					})
+					go this.Close()
+					break locp
 				}
+
 			}
 		}
 	}
@@ -173,12 +161,7 @@ func (this *Agent) IP() string {
 func (this *Agent) UserId() string {
 	return this.uId
 }
-func (this *Agent) AgentId() string {
-	return this.aId
-}
-func (this *Agent) GameId() string {
-	return this.gid
-}
+
 func (this *Agent) ServicePath() string {
 	return this.spath
 }
@@ -186,7 +169,6 @@ func (this *Agent) ServicePath() string {
 func (this *Agent) GetSessionData() *pb.UserSessionData {
 	return &pb.UserSessionData{
 		SessionId:  this.sessionId,
-		AgentId:    this.aId,
 		UserId:     this.uId,
 		Ip:         this.IP(),
 		ServiceTag: this.gateway.Service().GetTag(),
@@ -242,7 +224,7 @@ func (this *Agent) HandleMessage(msg *pb.UserMessage) (err error) {
 			Err:         &pb.ErrorData{Code: pb.ErrorCode_GatewayException, Message: err.Error()},
 		})
 		err = this.WriteMsgs(&pb.UserMessage{
-			MsgName: comm.Msg_GatewayHeartbeat,
+			MsgName: Msg_GatewayErrornotify,
 			Data:    data,
 		})
 	}
@@ -252,9 +234,9 @@ func (this *Agent) HandleMessage(msg *pb.UserMessage) (err error) {
 // 分发用户消息
 func (this *Agent) messageDistribution(msg *pb.UserMessage) (err error) {
 	var (
-		spath string              = this.spath
-		req   *pb.AgentMessage    = getmsg()
-		reply *pb.RPCMessageReply = getmsgreply()
+		spath string                           = this.spath
+		req   *pb.AgentMessage                 = getmsg()
+		reply *pb.RPC_Gateway_UserMessageReply = getmsgreply()
 	)
 	defer func() {
 		putmsg(req)
@@ -262,7 +244,6 @@ func (this *Agent) messageDistribution(msg *pb.UserMessage) (err error) {
 	}()
 	req.UserSession.Ip = this.IP()
 	req.UserSession.SessionId = this.sessionId
-	req.UserSession.AgentId = this.aId
 	req.UserSession.UserId = this.uId
 	req.UserSession.ServiceTag = this.gateway.Service().GetTag()
 	req.UserSession.GatewayId = this.gateway.Service().GetId()
@@ -308,13 +289,13 @@ func (this *Agent) messageDistribution(msg *pb.UserMessage) (err error) {
 			Req:     msg.Data,
 			Err:     reply.ErrorData})
 		err = this.WriteMsgs(&pb.UserMessage{
-			MsgName: comm.Msg_GatewayErrornotify,
+			MsgName: Msg_GatewayErrornotify,
 			Data:    data,
 		})
 		return
 	} else {
 		for _, v := range reply.Reply {
-			if v.MsgName == msg.MsgName && v.MsgName == comm.Msg_UserLogin {
+			if v.MsgName == msg.MsgName && v.MsgName == Msg_UserLogin {
 				var (
 					resp      proto.Message
 					loginresp *pb.UserLoginResp
@@ -324,8 +305,6 @@ func (this *Agent) messageDistribution(msg *pb.UserMessage) (err error) {
 				}
 				loginresp = resp.(*pb.UserLoginResp)
 				this.uId = loginresp.Uid
-				this.aId = loginresp.Agentid
-				this.gid = loginresp.Gameid
 				this.spath = reply.ServicePath
 				this.gateway.LoginNotice(this)
 			}

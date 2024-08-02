@@ -11,15 +11,19 @@ import (
 	"github.com/liwei1dao/lego/sys/gin/engine"
 )
 
+const (
+	Msg_GatewayHeartbeat   string = "gateway/heartbeat"   //网关心跳协议
+	Msg_GatewayErrornotify string = "gateway/errornotify" //网关错误推送
+	Msg_UserLogin          string = "user/login"          //用户登录协议
+)
+
 type (
 	// IAgent 用户代理对象接口定义
 	IAgent interface {
-		SessionId() string
-		IP() string
-		AgentId() string
-		GameId() string
-		UserId() string
 		ServicePath() string
+		SessionId() string
+		UserId() string
+		IP() string
 		GetSessionData() *pb.UserSessionData
 		WriteMsgs(msgs ...*pb.UserMessage) (err error)
 		WriteBytes(data []byte) (err error)
@@ -61,16 +65,16 @@ func putmsg(r *pb.AgentMessage) {
 
 var msgreplyPool = &sync.Pool{
 	New: func() interface{} {
-		return &pb.RPCMessageReply{}
+		return &pb.RPC_Gateway_UserMessageReply{}
 	},
 }
 
-func getmsgreply() *pb.RPCMessageReply {
-	reply := msgreplyPool.Get().(*pb.RPCMessageReply)
+func getmsgreply() *pb.RPC_Gateway_UserMessageReply {
+	reply := msgreplyPool.Get().(*pb.RPC_Gateway_UserMessageReply)
 	return reply
 }
 
-func putmsgreply(r *pb.RPCMessageReply) {
+func putmsgreply(r *pb.RPC_Gateway_UserMessageReply) {
 	msgreplyPool.Put(r)
 }
 

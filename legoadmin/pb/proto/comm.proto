@@ -37,12 +37,6 @@ message AgentMessage {
   google.protobuf.Any Message = 3;
 }
 
-// RPC 服务固定回复结构
-message RPCMessageReply {
-  string ServicePath = 1;
-  ErrorData ErrorData = 2;
-  repeated UserMessage Reply = 3;
-}
 
 // RPC 服务固定回复结构
 message RPCHttpMessageReply {
@@ -60,11 +54,7 @@ message AgentBuildReq {
 //用户代理解绑请求
 message AgentUnBuildReq { string UserSessionId = 1; }
 
-//向用户代理发送消息请求
-message AgentSendMessageReq {
-  string UserSessionId = 1;
-  repeated UserMessage Reply = 2;
-}
+
 
 //发送批量消息
 message BatchMessageReq {
