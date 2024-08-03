@@ -12,7 +12,7 @@ import (
 )
 
 // 登录
-func (this *apiComp) Login(session comm.IUserSession, req *pb.UserLoginReq) (errdata *pb.ErrorData) {
+func (this *apiComp) Login(session comm.IUserContext, req *pb.UserLoginReq) (errdata *pb.ErrorData) {
 	var (
 		user pb.DBUser
 		err  error

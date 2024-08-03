@@ -12,9 +12,9 @@ import (
 )
 
 type IService interface {
-	base.IRPCXService
-	GetUserSession(cache *pb.UserSessionData) (session IUserSession)
-	PutUserSession(session IUserSession)
+	base.IClusterService
+	GetUserContext(ctx context.Context, cache *pb.UserCacheData) (session IUserContext)
+	PutUserContext(ctx IUserContext)
 }
 
 // 服务网关组件接口定义
@@ -32,23 +32,21 @@ type ISC_HttpRouteComp interface {
 }
 
 // 用户会话
-type IUserSession interface {
-	SetSession(ctx context.Context, service IService, cache *pb.UserSessionData)
-	GetCache() *pb.UserSessionData
+type IUserContext interface {
+	SetSession(ctx context.Context, service IService, cache *pb.UserCacheData)
+	GetCache() *pb.UserCacheData
 	GetUserId() string
 	IsOnline() bool
 	UnBind() (err error)
 	SendMsg(mainType, subType string, msg proto.Message) (err error)
-	Polls() []*pb.UserMessage
-	Push() (err error)       //警告 api传递过来的会话禁用此接口
-	SyncPush() (err error)   //警告 api传递过来的会话禁用此接口 同步
-	SetOffline(offline bool) //设置离线状态
-	GetOffline() bool        //设置离线状态
+	Polls() []*pb.UserMessage //获取缓存消息
+	Push() (err error)        //警告 api传递过来的会话禁用此接口
+	SyncPush() (err error)    //警告 api传递过来的会话禁用此接口 同步
 	Close() (err error)
 	Reset()
 	SetMate(name string, value interface{})
 	GetMate(name string) (ok bool, value interface{})
-	Clone() (session IUserSession) //克隆
+	Clone(ctx context.Context) (session IUserContext) //克隆
 }
 
 // Claims struct to define JWT claims

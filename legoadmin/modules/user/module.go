@@ -62,11 +62,11 @@ func (this *User) GetUser(uid string) (user *pb.DBUser, err error) {
 
 // Event------------------------------------------------------------------------------------------------------------
 // 用户离线通知
-func (this *User) EventUserLogin(session comm.IUserSession) {
+func (this *User) EventUserLogin(session comm.IUserContext) {
 
 }
 
 // 用户离线通知
-func (this *User) EventUserOffline(session comm.IUserSession) {
+func (this *User) EventUserOffline(session comm.IUserContext) {
 
 }

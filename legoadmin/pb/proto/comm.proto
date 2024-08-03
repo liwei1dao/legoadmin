@@ -20,7 +20,8 @@ message UserMessage {
   google.protobuf.Any Data = 3;
 }
 
-message UserSessionData{
+//用户缓存数据
+message UserCacheData{
   string SessionId = 1;
   string UserId = 2;
   string Ip = 3;

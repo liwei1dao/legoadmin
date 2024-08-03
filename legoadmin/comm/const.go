@@ -60,3 +60,8 @@ const (
 const (
 	Session_User = "user"
 )
+
+//对象池
+const (
+	Pool_UserSession = "Pool_UserSession"
+)

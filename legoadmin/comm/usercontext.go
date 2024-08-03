@@ -12,9 +12,9 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-func NewUserSession() IUserSession {
+func NewUserContext() IUserContext {
 	return &UserContext{
-		userCache: &pb.UserSessionData{},
+		userCache: &pb.UserCacheData{},
 		msgqueue:  make([]*pb.UserMessage, 0),
 	}
 }
@@ -22,16 +22,15 @@ func NewUserSession() IUserSession {
 // 用户会话
 type UserContext struct {
 	context.Context
-	userCache *pb.UserSessionData
+	userCache *pb.UserCacheData
 	service   IService
 	msgqueue  []*pb.UserMessage
 	lock      sync.RWMutex
 	mate      map[string]interface{}
-	offline   bool
 }
 
 // 重置
-func (this *UserContext) SetSession(ctx context.Context, service IService, cache *pb.UserSessionData) {
+func (this *UserContext) SetSession(ctx context.Context, service IService, cache *pb.UserCacheData) {
 	this.Context = ctx
 	this.service = service
 	this.userCache.SessionId = cache.SessionId
@@ -53,7 +52,7 @@ func (this *UserContext) Reset() {
 }
 
 // 获取用户的会话id
-func (this *UserContext) GetCache() *pb.UserSessionData {
+func (this *UserContext) GetCache() *pb.UserCacheData {
 	return this.userCache
 }
 
@@ -67,13 +66,6 @@ func (this *UserContext) IsOnline() bool {
 		return false
 	}
 	return true
-}
-
-func (this *UserContext) SetOffline(offline bool) {
-	this.offline = offline
-}
-func (this *UserContext) GetOffline() bool {
-	return this.offline
 }
 
 // 解绑uid 注销和切换账号是处理
@@ -159,8 +151,8 @@ func (this *UserContext) GetMate(name string) (ok bool, value interface{}) {
 }
 
 // 克隆
-func (this *UserContext) Clone() (session IUserSession) {
-	session = this.service.GetUserSession(this.userCache)
+func (this *UserContext) Clone(ctx context.Context) (session IUserContext) {
+	session = this.service.GetUserContext(ctx, this.userCache)
 	this.lock.RLock()
 	for k, v := range this.mate {
 		session.SetMate(k, v)

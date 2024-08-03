@@ -95,7 +95,7 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 		//序列化用户消息对象
 		msg = pools.GetForType(msghandle.msgType)
 		if err = json.Unmarshal(args.Message, msg); err != nil {
-			log.Errorf("[Handle Api] UserMessage:%s Unmarshal err:%v", args.MsgName, err)
+			log.Errorf("[Handle Http] UserMessage:%s Unmarshal err:%v", args.MsgName, err)
 			return err
 		}
 		//执行处理流
@@ -104,7 +104,7 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 		errdata := handlereturn[1]
 		if !errdata.IsNil() { //处理返货错误码 返回用户错误信息
 			reply.ErrorData = errdata.Interface().(*pb.ErrorData)
-			log.Error("[Handle Api]",
+			log.Error("[Handle Http]",
 				log.Field{Key: "t", Value: time.Since(stime).Milliseconds()},
 				log.Field{Key: "m", Value: args.MsgName},
 				log.Field{Key: "uid", Value: args.UserId},
@@ -116,7 +116,7 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 			reply.Data, _ = anypb.New(resp)
 			nt := time.Since(stime).Milliseconds()
 			if this.options.MaxTime == 0 || nt < int64(this.options.MaxTime) {
-				log.Debug("[Handle Api]",
+				log.Debug("[Handle Http]",
 					log.Field{Key: "t", Value: time.Since(stime).Milliseconds()},
 					log.Field{Key: "m", Value: args.MsgName},
 					log.Field{Key: "uid", Value: args.UserId},
@@ -124,7 +124,7 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 					log.Field{Key: "reply", Value: reply.String()},
 				)
 			} else {
-				log.Error("[Handle Api] 执行时间过长",
+				log.Error("[Handle Http] 执行时间过长",
 					log.Field{Key: "t", Value: time.Since(stime).Milliseconds()},
 					log.Field{Key: "m", Value: args.MsgName},
 					log.Field{Key: "uid", Value: args.UserId},
@@ -134,10 +134,10 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 			}
 		}
 	} else { //未找到消息处理函数
-		log.Errorf("[Handle Api] no found handle %s", args.MsgName)
+		log.Errorf("[Handle Http] no found handle %s", args.MsgName)
 		reply.ErrorData = &pb.ErrorData{
 			Code:    pb.ErrorCode_NoFindServiceHandleFunc,
-			Message: fmt.Sprintf("[Handle Api] no found handle %s", args.MsgName),
+			Message: fmt.Sprintf("[Handle Http] no found handle %s", args.MsgName),
 		}
 	}
 	return nil

@@ -35,7 +35,7 @@ func (this *ModuleBase) Init(service core.IService, module core.IModule, options
 }
 
 // 异步调用用户处理流
-func (this *ModuleBase) AsynHandleSession(session comm.IUserSession, handle func(session comm.IUserSession)) {
+func (this *ModuleBase) AsynHandleSession(uctx comm.IUserContext, handle func(session comm.IUserContext)) {
 	defer func() { //程序异常 收集异常信息传递给前端显示
 		if r := recover(); r != nil {
 			buf := make([]byte, 4096)
@@ -44,11 +44,11 @@ func (this *ModuleBase) AsynHandleSession(session comm.IUserSession, handle func
 			log.Errorf("[AsynHandleSession] err:%s", err.Error())
 		}
 	}()
-	handle(session)
-	if session.IsOnline() {
-		session.Push()
+	handle(uctx)
+	if uctx.IsOnline() {
+		uctx.Push()
 	}
-	this.service.PutUserSession(session)
+	this.service.PutUserContext(uctx)
 }
 
 // 日志

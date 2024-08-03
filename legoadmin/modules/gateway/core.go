@@ -29,7 +29,7 @@ type (
 		SessionId() string
 		UserId() string
 		IP() string
-		GetSessionData() *pb.UserSessionData
+		GetSessionData() *pb.UserCacheData
 		UnBuild()
 		WriteMsgs(msgs ...*pb.UserMessage) (err error)
 		WriteBytes(data []byte) (err error)

@@ -10,7 +10,7 @@ message RPC_EmptyResp {}
 // RPC向用户代理发送消息请求
 message Rpc_GatewayRouteReq {
     string MsgName = 1;
-    UserSessionData UserSession = 3;
+    UserCacheData UserCache = 3;
     google.protobuf.Any Message = 4;
 }
 
@@ -90,7 +90,7 @@ message Rpc_GatewayAgentUnBindResp {
 
 //通知用户离线
 message RPC_Gateway_NoticeUserCloseReq {
-    UserSessionData UserSession = 1;
+    UserCacheData UserCache = 1;
 }
 message RPC_Gateway_NoticeUserCloseResp {
 

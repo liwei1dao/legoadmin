@@ -167,8 +167,8 @@ func (this *Agent) ServicePath() string {
 	return this.spath
 }
 
-func (this *Agent) GetSessionData() *pb.UserSessionData {
-	return &pb.UserSessionData{
+func (this *Agent) GetSessionData() *pb.UserCacheData {
+	return &pb.UserCacheData{
 		SessionId:  this.sessionId,
 		UserId:     this.uId,
 		Ip:         this.IP(),
@@ -247,11 +247,11 @@ func (this *Agent) messageDistribution(msg *pb.UserMessage) (err error) {
 		pools.PutForType(gatewayReqTyoe, req)
 		pools.PutForType(gatewayRespTyoe, reply)
 	}()
-	req.UserSession.Ip = this.IP()
-	req.UserSession.SessionId = this.sessionId
-	req.UserSession.UserId = this.uId
-	req.UserSession.ServiceTag = this.gateway.Service().GetTag()
-	req.UserSession.GatewayId = this.gateway.Service().GetId()
+	req.UserCache.Ip = this.IP()
+	req.UserCache.SessionId = this.sessionId
+	req.UserCache.UserId = this.uId
+	req.UserCache.ServiceTag = this.gateway.Service().GetTag()
+	req.UserCache.GatewayId = this.gateway.Service().GetId()
 	req.MsgName = msg.MsgName
 	req.Message = msg.Data
 	stime := time.Now()
@@ -262,7 +262,7 @@ func (this *Agent) messageDistribution(msg *pb.UserMessage) (err error) {
 		err = fmt.Errorf("no MsgName!")
 		this.gateway.Error("[UserResponse]",
 			log.Field{Key: "uid", Value: this.uId},
-			log.Field{Key: "serviceTag", Value: req.UserSession.ServiceTag},
+			log.Field{Key: "serviceTag", Value: req.UserCache.ServiceTag},
 			log.Field{Key: "servicePath", Value: msg.ServicePath},
 			log.Field{Key: "req", Value: fmt.Sprintf("%s:%v", req.MsgName, req.Message.String())},
 			log.Field{Key: "err", Value: err.Error()},
@@ -273,7 +273,7 @@ func (this *Agent) messageDistribution(msg *pb.UserMessage) (err error) {
 	if err = this.gateway.Service().RpcCall(context.Background(), spath, string(comm.Rpc_GatewayRoute), req, reply); err != nil {
 		this.gateway.Error("[UserResponse]",
 			log.Field{Key: "uid", Value: this.uId},
-			log.Field{Key: "serviceTag", Value: req.UserSession.ServiceTag},
+			log.Field{Key: "serviceTag", Value: req.UserCache.ServiceTag},
 			log.Field{Key: "servicePath", Value: msg.ServicePath},
 			log.Field{Key: "req", Value: fmt.Sprintf("%s:%v", req.MsgName, req.Message.String())},
 			log.Field{Key: "err", Value: err.Error()},

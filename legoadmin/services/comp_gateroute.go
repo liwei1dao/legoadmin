@@ -46,7 +46,7 @@ type SCompGateRoute struct {
 	service    comm.IService                //rpc服务对象 通过这个对象可以发布服务和调用其他服务的接口
 	msghandles map[string]*msghandle        //处理函数的管理对象
 	slock      sync.RWMutex                 //回话锁
-	sessions   map[string]comm.IUserSession //用户会话对象管理
+	sessions   map[string]comm.IUserContext //用户会话对象管理
 }
 
 // 设置服务组件名称 方便业务模块中获取此组件对象
@@ -64,7 +64,7 @@ func (this *SCompGateRoute) Init(service core.IService, comp core.IServiceComp, 
 	this.options = options.(*CompOptions)
 	this.service = service.(comm.IService)
 	this.msghandles = make(map[string]*msghandle)
-	this.sessions = make(map[string]comm.IUserSession)
+	this.sessions = make(map[string]comm.IUserContext)
 	return err
 }
 
@@ -98,29 +98,26 @@ func (this *SCompGateRoute) RegisterRoute(methodName string, comp reflect.Value,
 func (this *SCompGateRoute) Rpc_GatewayRoute(ctx context.Context, args *pb.Rpc_GatewayRouteReq, reply *pb.Rpc_GatewayRouteResp) (err error) {
 	var (
 		msghandle *msghandle
-		session   comm.IUserSession
+		session   comm.IUserContext
+		msg       interface{}
 		ok        bool
 	)
 	reply.ServicePath = fmt.Sprintf("%s/%s", this.service.GetType(), this.service.GetId())
 	msghandle, ok = this.msghandles[args.MsgName]
 	if ok {
-		if args.UserSession.UserId != "" {
+		if args.UserCache.UserId != "" {
 			this.slock.RLock()
-			session, ok = this.sessions[args.UserSession.UserId]
+			session, ok = this.sessions[args.UserCache.UserId]
 			this.slock.RUnlock()
 			if !ok {
-				session = this.service.GetUserSession(args.UserSession)
+				session = this.service.GetUserContext(ctx, args.UserCache)
 			}
 		} else {
-			session = this.service.GetUserSession(args.UserSession)
-
+			session = this.service.GetUserContext(ctx, args.UserCache)
 		}
 
-		//序列化用户消息对象
-		var msg interface{}
-
 		if msg, err = args.Message.UnmarshalNew(); err != nil {
-			log.Errorf("[Handle Api] UserMessage:%s Unmarshal err:%v", args.MsgName, err)
+			log.Errorf("[Handle Gateway] UserMessage:%s Unmarshal err:%v", args.MsgName, err)
 			return err
 		}
 
@@ -132,10 +129,10 @@ func (this *SCompGateRoute) Rpc_GatewayRoute(ctx context.Context, args *pb.Rpc_G
 			//data, _ := anypb.New(errdata.(proto.Message))
 			reply.ErrorData = errdata.Interface().(*pb.ErrorData)
 			// log.Errorf("[Handle Api] t:%v m:%s req:%v reply:%v", time.Since(stime), method, msg, reply)
-			log.Error("[Handle Api]",
+			log.Error("[Handle Gateway]",
 				log.Field{Key: "t", Value: time.Since(stime).Milliseconds()},
 				log.Field{Key: "m", Value: args.MsgName},
-				log.Field{Key: "uid", Value: args.UserSession.UserId},
+				log.Field{Key: "uid", Value: args.UserCache.UserId},
 				log.Field{Key: "req", Value: msg},
 				log.Field{Key: "reply", Value: reply.String()},
 			)
@@ -144,28 +141,28 @@ func (this *SCompGateRoute) Rpc_GatewayRoute(ctx context.Context, args *pb.Rpc_G
 			// log.Debugf("[Handle Api] t:%v m:%s uid:%s req:%v reply:%v", time.Since(stime), method, args.UserId, msg, reply)
 			nt := time.Since(stime).Milliseconds()
 			if this.options.MaxTime == 0 || nt < int64(this.options.MaxTime) {
-				log.Debug("[Handle Api]",
+				log.Debug("[Handle Gateway]",
 					log.Field{Key: "t", Value: time.Since(stime).Milliseconds()},
 					log.Field{Key: "m", Value: args.MsgName},
-					log.Field{Key: "uid", Value: args.UserSession.UserId},
+					log.Field{Key: "uid", Value: args.UserCache.UserId},
 					log.Field{Key: "req", Value: msg},
 					log.Field{Key: "reply", Value: reply.String()},
 				)
 			} else {
-				log.Error("[Handle Api]",
+				log.Error("[Handle Gateway]",
 					log.Field{Key: "t", Value: time.Since(stime).Milliseconds()},
 					log.Field{Key: "m", Value: args.MsgName},
-					log.Field{Key: "uid", Value: args.UserSession.UserId},
+					log.Field{Key: "uid", Value: args.UserCache.UserId},
 					log.Field{Key: "req", Value: msg},
 					log.Field{Key: "reply", Value: reply.String()},
 				)
 			}
 		}
 	} else { //未找到消息处理函数
-		log.Errorf("[Handle Api] no found handle %s", args.MsgName)
+		log.Errorf("[Handle Gateway] no found handle %s", args.MsgName)
 		reply.ErrorData = &pb.ErrorData{
 			Code:    pb.ErrorCode_ReqParameterError,
-			Message: fmt.Sprintf("[Handle Api] no found handle %s", args.MsgName),
+			Message: fmt.Sprintf("[Handle Gateway] no found handle %s", args.MsgName),
 		}
 	}
 	return nil
@@ -174,15 +171,15 @@ func (this *SCompGateRoute) Rpc_GatewayRoute(ctx context.Context, args *pb.Rpc_G
 // RPC_NoticeUserClose 接收用户离线通知
 func (this *SCompGateRoute) Rpc_GatewayNoticeUserClose(ctx context.Context, args *pb.RPC_Gateway_NoticeUserCloseReq, reply *pb.RPC_Gateway_NoticeUserCloseResp) error {
 	var (
-		session comm.IUserSession
+		session comm.IUserContext
 		ok      bool
 	)
 	this.slock.RLock()
-	session, ok = this.sessions[args.UserSession.UserId]
+	session, ok = this.sessions[args.UserCache.UserId]
 	this.slock.RUnlock()
 	if ok {
 		this.slock.Lock()
-		delete(this.sessions, args.UserSession.UserId)
+		delete(this.sessions, args.UserCache.UserId)
 		this.slock.Unlock()
 		event.TriggerEvent(comm.EventUserOffline, session)
 	} else {
@@ -192,7 +189,7 @@ func (this *SCompGateRoute) Rpc_GatewayNoticeUserClose(ctx context.Context, args
 }
 
 // 对外接口----------------------------------------------------------------------------------------------------------------------------------
-func (this *SCompGateRoute) AddUserSession(session comm.IUserSession) {
+func (this *SCompGateRoute) AddUserSession(session comm.IUserContext) {
 	this.slock.Lock()
 	this.sessions[session.GetUserId()] = session
 	this.slock.Unlock()

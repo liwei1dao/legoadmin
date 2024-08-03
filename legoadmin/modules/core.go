@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	typeOfSession   = reflect.TypeOf((*comm.IUserSession)(nil)).Elem()
+	typeOfSession   = reflect.TypeOf((*comm.IUserContext)(nil)).Elem()
 	typeOfMessage   = reflect.TypeOf((*proto.Message)(nil)).Elem()
 	typeOfErrorCode = reflect.TypeOf((*pb.ErrorCode)(nil)).Elem()
 	typeOfErrorData = reflect.TypeOf((*pb.ErrorData)(nil))

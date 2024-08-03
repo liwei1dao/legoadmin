@@ -76,7 +76,7 @@ func (this *AgentMgrComp) DisConnect(a IAgent) {
 	if a.UserId() != "" { //登录用户 通知业务服务处理玩家离线相关
 		atomic.AddInt32(&this.onlineuser, -1)
 		if _, err := this.service.RpcGo(context.Background(), a.ServicePath(), string(comm.Rpc_GatewayNoticeUserClose), &pb.RPC_Gateway_NoticeUserCloseReq{
-			UserSession: a.GetSessionData(),
+			UserCache: a.GetSessionData(),
 		}, nil); err != nil {
 			log.Errorf("uId:%s Rpc_NoticeUserClose err:%v", a.UserId(), err)
 		}
