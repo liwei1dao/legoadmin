@@ -19,6 +19,7 @@ func (this *ServiceBase) Init(service core.IService) (err error) {
 	if err = this.ClusterService.Init(service); err != nil {
 		return
 	}
+	pools.Add(comm.Pool_HttpSession, func() comm.IHttpContext { return comm.NewHttpContext() })
 	pools.Add(comm.Pool_UserSession, func() comm.IUserContext { return comm.NewUserContext() })
 	return
 }
@@ -26,6 +27,14 @@ func (this *ServiceBase) Init(service core.IService) (err error) {
 // 初始化相关系统
 func (this *ServiceBase) InitSys() {
 	this.ClusterService.InitSys()
+}
+func (this *ServiceBase) GetHttpContext(ctx context.Context) (context comm.IHttpContext) {
+	context = pools.Get[comm.IHttpContext](comm.Pool_HttpSession)
+	return
+}
+
+func (this *ServiceBase) PutHttpContext(ctx comm.IHttpContext) {
+	pools.Put[comm.IHttpContext](comm.Pool_HttpSession, ctx)
 }
 
 func (this *ServiceBase) GetUserContext(ctx context.Context, cache *pb.UserCacheData) (session comm.IUserContext) {

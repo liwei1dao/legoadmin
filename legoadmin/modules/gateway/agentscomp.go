@@ -139,7 +139,6 @@ func (this *AgentMgrComp) SendMsgsToAgents(ctx context.Context, args *pb.Rpc_Gat
 		if a, ok := this.agents.Load(k); ok {
 			agent := a.(IAgent)
 			if agent.UserId() != "" { //自发送登录用户
-
 				msg := &pb.MessagePackage{
 					Messages: make([]*pb.UserMessage, 0),
 				}

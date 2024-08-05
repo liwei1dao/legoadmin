@@ -83,7 +83,7 @@ func (this *MCompGate) reflectionRouteHandle(typ reflect.Type, method reflect.Me
 		return
 	}
 	sessionType := mtype.In(1)
-	if !sessionType.Implements(typeOfSession) {
+	if !sessionType.Implements(typeOfUserContext) {
 		log.Panicf("反射注册用户处理函数错误 [%s-%s] Api接口格式错误", this.module.GetType(), mname)
 		return
 	}

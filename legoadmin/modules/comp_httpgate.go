@@ -78,7 +78,7 @@ func (this *MCompHttpGate) reflectionRouteHandle(typ reflect.Type, method reflec
 		return
 	}
 	contextType := mtype.In(1)
-	if !contextType.Implements(typeOfContext) {
+	if !contextType.Implements(typeOfHttpContext) {
 		log.Panicf("反射注册用户处理函数错误 [%s-%s] Api接口格式错误", this.module.GetType(), mname)
 		return
 	}

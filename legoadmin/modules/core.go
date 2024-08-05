@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"context"
 	"legoadmin/comm"
 	"legoadmin/pb"
 	"reflect"
@@ -12,12 +11,12 @@ import (
 )
 
 var (
-	typeOfSession   = reflect.TypeOf((*comm.IUserContext)(nil)).Elem()
-	typeOfMessage   = reflect.TypeOf((*proto.Message)(nil)).Elem()
-	typeOfErrorCode = reflect.TypeOf((*pb.ErrorCode)(nil)).Elem()
-	typeOfErrorData = reflect.TypeOf((*pb.ErrorData)(nil))
-	typeOfError     = reflect.TypeOf((*error)(nil)).Elem()
-	typeOfContext   = reflect.TypeOf((*context.Context)(nil)).Elem()
+	typeOfHttpContext = reflect.TypeOf((*comm.IHttpContext)(nil)).Elem()
+	typeOfUserContext = reflect.TypeOf((*comm.IUserContext)(nil)).Elem()
+	typeOfMessage     = reflect.TypeOf((*proto.Message)(nil)).Elem()
+	typeOfErrorCode   = reflect.TypeOf((*pb.ErrorCode)(nil)).Elem()
+	typeOfErrorData   = reflect.TypeOf((*pb.ErrorData)(nil))
+	typeOfError       = reflect.TypeOf((*error)(nil)).Elem()
 )
 
 type (

@@ -13,6 +13,8 @@ import (
 
 type IService interface {
 	base.IClusterService
+	GetHttpContext(ctx context.Context) (context IHttpContext)
+	PutHttpContext(ctx IHttpContext)
 	GetUserContext(ctx context.Context, cache *pb.UserCacheData) (session IUserContext)
 	PutUserContext(ctx IUserContext)
 }
@@ -31,8 +33,15 @@ type ISC_HttpRouteComp interface {
 	RegisterRoute(methodName string, comp reflect.Value, msg reflect.Type, handle reflect.Method)
 }
 
+type IHttpContext interface {
+	context.Context
+	SetMate(name string, value interface{})
+	GetMate(name string) (ok bool, value interface{})
+}
+
 // 用户会话
 type IUserContext interface {
+	context.Context
 	SetSession(ctx context.Context, service IService, cache *pb.UserCacheData)
 	GetCache() *pb.UserCacheData
 	GetUserId() string

@@ -61,7 +61,13 @@ const (
 	Session_User = "user"
 )
 
+//session 缓存数据Key
+const (
+	HttpContext_UserId = "userid"
+)
+
 //对象池
 const (
+	Pool_HttpSession = "Pool_HttpSession"
 	Pool_UserSession = "Pool_UserSession"
 )

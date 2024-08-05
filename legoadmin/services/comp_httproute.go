@@ -11,7 +11,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/liwei1dao/lego/base"
 	"github.com/liwei1dao/lego/core"
 	"github.com/liwei1dao/lego/core/cbase"
 	"github.com/liwei1dao/lego/sys/log"
@@ -38,7 +37,7 @@ func NewHttpRouteComp() comm.ISC_HttpRouteComp {
 // 服务网关组件
 type SCompHttpRoute struct {
 	cbase.ServiceCompBase
-	service    base.IClusterService //rpc服务对象 通过这个对象可以发布服务和调用其他服务的接口
+	service    comm.IService //rpc服务对象 通过这个对象可以发布服务和调用其他服务的接口
 	options    *RouteCompOptions
 	msghandles map[string]*msghandle //处理函数的管理对象
 }
@@ -54,7 +53,7 @@ func (this *SCompHttpRoute) NewOptions() (options core.ICompOptions) {
 // 组件初始化函数
 func (this *SCompHttpRoute) Init(service core.IService, comp core.IServiceComp, options core.ICompOptions) (err error) {
 	err = this.ServiceCompBase.Init(service, comp, options)
-	this.service = service.(base.IClusterService)
+	this.service = service.(comm.IService)
 	this.msghandles = make(map[string]*msghandle)
 	return err
 }
@@ -87,11 +86,14 @@ func (this *SCompHttpRoute) RegisterRoute(methodName string, comp reflect.Value,
 func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.Rpc_GatewayHttpRouteReq, reply *pb.Rpc_GatewayHttpRouteResp) (err error) {
 	var (
 		msghandle *msghandle
+		httpctx   comm.IHttpContext
 		msg       interface{}
 		ok        bool
 	)
 	msghandle, ok = this.msghandles[args.MsgName]
 	if ok {
+		httpctx = this.service.GetHttpContext(ctx)
+		httpctx.SetMate(comm.HttpContext_UserId, args.UserId)
 		//序列化用户消息对象
 		msg = pools.GetForType(msghandle.msgType)
 		if err = json.Unmarshal(args.Message, msg); err != nil {
@@ -100,7 +102,7 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 		}
 		//执行处理流
 		stime := time.Now()
-		handlereturn := msghandle.handle.Func.Call([]reflect.Value{msghandle.rcvr, reflect.ValueOf(ctx), reflect.ValueOf(msg)})
+		handlereturn := msghandle.handle.Func.Call([]reflect.Value{msghandle.rcvr, reflect.ValueOf(httpctx), reflect.ValueOf(msg)})
 		errdata := handlereturn[1]
 		if !errdata.IsNil() { //处理返货错误码 返回用户错误信息
 			reply.ErrorData = errdata.Interface().(*pb.ErrorData)

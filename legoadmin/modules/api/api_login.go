@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"legoadmin/comm"
 	"legoadmin/pb"
 	"time"
@@ -12,7 +11,7 @@ import (
 )
 
 // 创建代理
-func (this *apiComp) Login(ctx context.Context, req *pb.ApiLoginReq) (resp *pb.ApiLoginResp, errdata *pb.ErrorData) {
+func (this *apiComp) Login(ctx comm.IHttpContext, req *pb.ApiLoginReq) (resp *pb.ApiLoginResp, errdata *pb.ErrorData) {
 	var (
 		model       *pb.DBApiUser
 		tokenString string
