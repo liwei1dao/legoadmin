@@ -8,7 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/liwei1dao/lego/base"
+	"github.com/liwei1dao/lego/base/cluster"
 	"github.com/liwei1dao/lego/core"
 	"github.com/liwei1dao/lego/core/cbase"
 	"github.com/liwei1dao/lego/sys/log"
@@ -23,7 +23,7 @@ import (
 type AgentMgrComp struct {
 	cbase.ModuleCompBase
 	options    *Options
-	service    base.IRPCXService
+	service    cluster.IClusterService
 	module     *Gateway
 	agents     *sync.Map
 	users      *sync.Map
@@ -33,7 +33,7 @@ type AgentMgrComp struct {
 func (this *AgentMgrComp) Init(service core.IService, module core.IModule, comp core.IModuleComp, options core.IModuleOptions) (err error) {
 	err = this.ModuleCompBase.Init(service, module, comp, options)
 	this.options = options.(*Options)
-	this.service = service.(base.IRPCXService)
+	this.service = service.(cluster.IClusterService)
 	this.module = module.(*Gateway)
 	this.agents = new(sync.Map)
 	this.users = new(sync.Map)

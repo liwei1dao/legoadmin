@@ -9,7 +9,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/liwei1dao/lego/base"
+	"github.com/liwei1dao/lego/base/cluster"
 	"github.com/liwei1dao/lego/core"
 	"github.com/liwei1dao/lego/core/cbase"
 )
@@ -19,9 +19,9 @@ import (
 */
 type MCompGate struct {
 	cbase.ModuleCompBase
-	service base.IRPCXService //rpc服务对象
-	module  core.IModule      //当前业务模块
-	comp    core.IModuleComp  //网关组件自己
+	service cluster.IClusterService //rpc服务对象
+	module  core.IModule            //当前业务模块
+	comp    core.IModuleComp        //网关组件自己
 	scomp   comm.ISC_GateRouteComp
 }
 
@@ -32,7 +32,7 @@ func (this *MCompGate) GateRouteComp() comm.ISC_GateRouteComp {
 // 组件初始化接口
 func (this *MCompGate) Init(service core.IService, module core.IModule, comp core.IModuleComp, options core.IModuleOptions) (err error) {
 	this.ModuleCompBase.Init(service, module, comp, options)
-	this.service = service.(base.IRPCXService)
+	this.service = service.(cluster.IClusterService)
 	this.module = module
 	this.comp = comp
 	return

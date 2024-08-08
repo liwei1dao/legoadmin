@@ -7,7 +7,7 @@ import (
 	"legoadmin/comm"
 	"legoadmin/modules"
 
-	"github.com/liwei1dao/lego/base"
+	"github.com/liwei1dao/lego/base/cluster"
 	"github.com/liwei1dao/lego/core"
 )
 
@@ -18,7 +18,7 @@ func NewModule() core.IModule {
 
 type Timer struct {
 	modules.ModuleBase
-	service base.IRPCXService
+	service cluster.IClusterService
 	options *Options
 }
 
@@ -29,7 +29,7 @@ func (this *Timer) NewOptions() (options core.IModuleOptions) {
 	return new(Options)
 }
 func (this *Timer) Init(service core.IService, module core.IModule, options core.IModuleOptions) (err error) {
-	this.service = service.(base.IRPCXService)
+	this.service = service.(cluster.IClusterService)
 	this.options = options.(*Options)
 	if err = this.ModuleBase.Init(service, module, options); err != nil {
 		return

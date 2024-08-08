@@ -6,8 +6,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/liwei1dao/lego/base"
-
+	"github.com/liwei1dao/lego/base/cluster"
 	"github.com/liwei1dao/lego/sys/gin/engine"
 )
 
@@ -39,7 +38,7 @@ type (
 	// IGateway 网关模块 接口定义
 	IGateway interface {
 		modules.IModuleBase
-		Service() base.IRPCXService
+		Service() cluster.IClusterService
 		Connect(a IAgent)
 		DisConnect(a IAgent)
 		LoginNotice(a IAgent)

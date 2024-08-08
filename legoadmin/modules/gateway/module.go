@@ -7,7 +7,7 @@ import (
 	"legoadmin/comm"
 	"legoadmin/modules"
 
-	"github.com/liwei1dao/lego/base"
+	"github.com/liwei1dao/lego/base/cluster"
 	"github.com/liwei1dao/lego/core"
 	"github.com/liwei1dao/lego/sys/log"
 )
@@ -20,9 +20,9 @@ func NewModule() core.IModule {
 type Gateway struct {
 	modules.ModuleBase
 	options   *Options
-	service   base.IRPCXService //rpcx服务接口 主要client->server
-	agents    *AgentMgrComp     //客户端websocket连接管理
-	wsservice *ginComp          //websocket服务 监听websocket连接
+	service   cluster.IClusterService //rpcx服务接口 主要client->server
+	agents    *AgentMgrComp           //客户端websocket连接管理
+	wsservice *ginComp                //websocket服务 监听websocket连接
 }
 
 // GetType 获取模块服务类型
@@ -36,7 +36,7 @@ func (this *Gateway) NewOptions() (options core.IModuleOptions) {
 }
 
 // Service 获取rpcx服务接口
-func (this *Gateway) Service() base.IRPCXService {
+func (this *Gateway) Service() cluster.IClusterService {
 	return this.service
 }
 
@@ -46,7 +46,7 @@ func (this *Gateway) Init(service core.IService, module core.IModule, options co
 		return
 	}
 	this.options = options.(*Options)
-	this.service = service.(base.IRPCXService)
+	this.service = service.(cluster.IClusterService)
 	return
 }
 

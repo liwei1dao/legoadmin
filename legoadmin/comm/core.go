@@ -6,13 +6,13 @@ import (
 	"reflect"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/liwei1dao/lego/base"
+	"github.com/liwei1dao/lego/base/cluster"
 	"github.com/liwei1dao/lego/core"
 	"google.golang.org/protobuf/proto"
 )
 
 type IService interface {
-	base.IClusterService
+	cluster.IClusterService
 	GetHttpContext(ctx context.Context) (context IHttpContext)
 	PutHttpContext(ctx IHttpContext)
 	GetUserContext(ctx context.Context, cache *pb.UserCacheData) (session IUserContext)

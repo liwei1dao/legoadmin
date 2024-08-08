@@ -1,0 +1,27 @@
+tag: "admin" #服务集群标签 相同标签 且sys.registry 和 sys.rpc 配置一致 即可互相发现和通信
+type: "gateway" #服务类型 相同服务类型相同 如 多个login 服务 相同服务多开 服务类型一致
+addr: "127.0.0.1:7001" #服务版本 多服务器相同的服务类型 高版本比低版本拥有更高的访问优先级 使用场景 热更新机制
+
+
+#系统配置
+sys:
+  log: #日志系统
+    FileName: "./log/gateway.log" #日志文件存放地址
+    Loglevel: 5 #日志文件输出级别
+    MaxAgeTime: 7 #日志文件最多保留天数
+    IsDebug: true #是否开发模式
+  rpc: #rpc 系统配置
+    Debug: true
+    ETCDServers: ["127.0.0.1:12379","127.0.0.1:22379","127.0.0.1:32379"]
+    OutTime: 0 #消息超时时间
+  db: #存储系统
+    AdminMysqlDNS: root:li13451234@tcp(127.0.0.1:3306)/wuman?charset=utf8mb4&parseTime=True&loc=Local
+    AdminRedisAddr: ["localhost:6379"] 
+    AdminRedisPassword: li13451234
+    AdminRedisDB: 0
+
+#模块配置
+modules:
+  gateway:
+    ListenPort: 9100
+    Debug: true
