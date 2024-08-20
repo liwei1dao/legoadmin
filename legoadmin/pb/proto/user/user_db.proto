@@ -4,12 +4,12 @@ option go_package = ".;pb";
 
 message DBUser {
     string uid = 1;                         //@go_tags(`gorm:"uid:50;primaryKey"`) 用户ID
-    string agentid = 2;                     //渠道id
-    string binduid = 3;                     //@go_tags(`gorm:"binduid:50;unique"`) 玩家账号
+    string account = 2;                     //账号
+    string password = 3;                    //密码
+    string mail = 4;                        //邮箱
     string createip = 5;                    //创建账号时的ip
     int64 ctime = 6;                        //玩家创号时间戳
-    string playname = 7;                    //玩家名称
-    double balance = 9;                     //余额
+    string name = 7;                        //玩家名称
     int64 lastlogints = 10;                 //最后一次登录
   }
   
