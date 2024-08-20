@@ -44,5 +44,4 @@ type Service struct {
 // 初始化worker需要的一些系统工具
 func (this *Service) InitSys() {
 	this.ServiceBase.InitSys()
-
 }
