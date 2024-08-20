@@ -27,5 +27,6 @@ message UserCacheData{
   string Ip = 3;
   string ServiceTag = 4;
   string GatewayId = 5;
+  string Meta = 6;
 }
 

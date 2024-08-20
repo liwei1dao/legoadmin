@@ -14,41 +14,43 @@ import (
 // 登录
 func (this *apiComp) Login(session comm.IUserContext, req *pb.UserLoginReq) (errdata *pb.ErrorData) {
 	var (
-		user pb.DBUser
+		user *pb.DBUser
 		err  error
 	)
-	if err = db.MySql().FindOne(comm.TableUser, &user, db.M{"binduid": req.Account}); err != nil && err != mysql.ErrNoDocuments {
-		errdata = &pb.ErrorData{
-			Code:    pb.ErrorCode_DBError,
-			Message: err.Error(),
-		}
+	if user, err = this.module.model.getmodelForAccount(req.Account); err != nil {
 		this.module.Errorln(err)
 		return
 	}
 	if err == mysql.ErrNoDocuments { //创建新的账号
 		//如果是新玩家，创建一条基础的数据，页面会引导进入创角页面
-		user = pb.DBUser{
-			Uid:      id.NewXId(),
-			Binduid:  req.Account,
-			Createip: session.GetCache().Ip,
-			Ctime:    time.Now().Unix(),
-			Balance:  0,
+		user = &pb.DBUser{
+			Uid:         id.NewXId(),
+			Account:     req.Account,
+			Password:    req.Password,
+			Createip:    session.GetCache().Ip,
+			Ctime:       time.Now().Unix(),
+			Lastlogints: time.Now().Unix(),
 		}
 		if err = db.MySql().Insert(comm.TableUser, &user); err != nil {
 			errdata = &pb.ErrorData{
 				Code:    pb.ErrorCode_DBError,
 				Message: err.Error(),
 			}
-			this.module.Errorln(err)
+			return
+		}
+	} else {
+		if user.Password != req.Password {
+			errdata = &pb.ErrorData{
+				Code:    pb.ErrorCode_PasswordErr,
+				Message: pb.ErrorCode_PasswordErr.String(),
+			}
 			return
 		}
 	}
+
 	session.SetMate(comm.Session_User, &user)
 	session.SendMsg(string(this.module.GetType()), "login", &pb.UserLoginResp{
-		Uid:           user.Uid,
-		Agentid:       user.Agentid,
-		Playeraccount: user.Binduid,
-		Playername:    user.Playname,
+		User: user,
 	})
 	event.TriggerEvent(comm.EventUserLogin, session)
 	return

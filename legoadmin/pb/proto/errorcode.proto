@@ -19,4 +19,6 @@ enum ErrorCode {
   SystemError = 22;             //通用错误
   TokenInvalid = 23;            //token 是空
 
+  //业务逻辑
+  PasswordErr = 1001;           //密码错误
 }

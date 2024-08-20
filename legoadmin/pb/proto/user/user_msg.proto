@@ -1,20 +1,13 @@
 syntax = "proto3";
 option go_package = ".;pb";
+import "user/user_db.proto";
 
 //用户登录 
 message UserLoginReq {
     string account = 1;
     string password = 2;
 }
-  
-
-  
+//登录回应
 message UserLoginResp {
-      string uid = 1;
-      string agentid = 2;
-      string gameid = 3;        
-      string playeraccount = 4;     //玩家名称
-      string playername = 5;        //玩家名称
-      string currency = 6;          //@go_tags(`json:"currency"`)玩家选择的币种
-      double balance = 8;           //余额     
-  }
+    DBUser user = 1;
+}

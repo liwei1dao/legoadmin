@@ -32,3 +32,10 @@ func (this *userModel) getmodel(uid string) (model *pb.DBUser, err error) {
 	err = db.MySql().FindOne(comm.TableUser, model, db.M{"uid": uid})
 	return
 }
+
+// 获取代理数据
+func (this *userModel) getmodelForAccount(account string) (model *pb.DBUser, err error) {
+	model = &pb.DBUser{}
+	err = db.MySql().FindOne(comm.TableUser, model, db.M{"account": account})
+	return
+}

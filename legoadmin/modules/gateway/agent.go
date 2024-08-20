@@ -46,6 +46,7 @@ type Agent struct {
 	wsConn       *websocket.Conn
 	sessionId    string
 	uId          string
+	meta         map[string]interface{}
 	spath        string
 	writeChan    chan []byte
 	closeSignal  chan bool
@@ -309,7 +310,7 @@ func (this *Agent) messageDistribution(msg *pb.UserMessage) (err error) {
 					return
 				}
 				loginresp = resp.(*pb.UserLoginResp)
-				this.uId = loginresp.Uid
+				this.uId = loginresp.User.Uid
 				this.spath = reply.ServicePath
 				this.gateway.LoginNotice(this)
 			}
