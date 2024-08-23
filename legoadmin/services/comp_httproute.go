@@ -2,10 +2,10 @@ package services
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/liwei1dao/lego/utils/codec/json"
 
-	"fmt"
 	"legoadmin/comm"
 	"legoadmin/pb"
 	"reflect"
@@ -85,15 +85,19 @@ func (this *SCompHttpRoute) RegisterRoute(methodName string, comp reflect.Value,
 // Rpc_GatewayRoute服务接口的接收函数
 func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.Rpc_GatewayHttpRouteReq, reply *pb.Rpc_GatewayHttpRouteResp) (err error) {
 	var (
-		msghandle *msghandle
-		httpctx   comm.IHttpContext
-		msg       interface{}
-		ok        bool
+		msghandle  *msghandle
+		httpctx    comm.IHttpContext
+		msg        interface{}
+		httpResult *comm.HttpResult = pools.GetForType(httpResultTyoe).(*comm.HttpResult)
+		errordata  *pb.ErrorData
+		ok         bool
 	)
 	msghandle, ok = this.msghandles[args.MsgName]
 	if ok {
 		httpctx = this.service.GetHttpContext(ctx)
-		httpctx.SetMate(comm.HttpContext_UserId, args.UserId)
+		for k, v := range args.Meta {
+			httpctx.SetMate(k, v)
+		}
 		//序列化用户消息对象
 		msg = pools.GetForType(msghandle.msgType)
 		if err = json.Unmarshal(args.Message, msg); err != nil {
@@ -105,23 +109,28 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 		handlereturn := msghandle.handle.Func.Call([]reflect.Value{msghandle.rcvr, reflect.ValueOf(httpctx), reflect.ValueOf(msg)})
 		errdata := handlereturn[1]
 		if !errdata.IsNil() { //处理返货错误码 返回用户错误信息
-			reply.ErrorData = errdata.Interface().(*pb.ErrorData)
+			errordata = errdata.Interface().(*pb.ErrorData)
+			httpResult.Code = errordata.Code
+			httpResult.Message = errordata.Message
+			httpResult.Data = nil
 			log.Error("[Handle Http]",
 				log.Field{Key: "t", Value: time.Since(stime).Milliseconds()},
 				log.Field{Key: "m", Value: args.MsgName},
-				log.Field{Key: "uid", Value: args.UserId},
+				log.Field{Key: "meta", Value: args.Meta},
 				log.Field{Key: "req", Value: msg},
 				log.Field{Key: "reply", Value: reply.String()},
 			)
 		} else {
 			resp := handlereturn[0].Interface().(proto.Message)
-			reply.Data, _ = anypb.New(resp)
+			httpResult.Code = pb.ErrorCode_Success
+			httpResult.Message = "Success"
+			httpResult.Data, _ = anypb.New(resp)
 			nt := time.Since(stime).Milliseconds()
 			if this.options.MaxTime == 0 || nt < int64(this.options.MaxTime) {
 				log.Debug("[Handle Http]",
 					log.Field{Key: "t", Value: time.Since(stime).Milliseconds()},
 					log.Field{Key: "m", Value: args.MsgName},
-					log.Field{Key: "uid", Value: args.UserId},
+					log.Field{Key: "meta", Value: args.Meta},
 					log.Field{Key: "req", Value: msg},
 					log.Field{Key: "reply", Value: reply.String()},
 				)
@@ -129,7 +138,7 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 				log.Error("[Handle Http] 执行时间过长",
 					log.Field{Key: "t", Value: time.Since(stime).Milliseconds()},
 					log.Field{Key: "m", Value: args.MsgName},
-					log.Field{Key: "uid", Value: args.UserId},
+					log.Field{Key: "meta", Value: args.Meta},
 					log.Field{Key: "req", Value: msg},
 					log.Field{Key: "reply", Value: reply.String()},
 				)
@@ -137,10 +146,11 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 		}
 	} else { //未找到消息处理函数
 		log.Errorf("[Handle Http] no found handle %s", args.MsgName)
-		reply.ErrorData = &pb.ErrorData{
-			Code:    pb.ErrorCode_NoFindServiceHandleFunc,
-			Message: fmt.Sprintf("[Handle Http] no found handle %s", args.MsgName),
-		}
+		httpResult.Code = pb.ErrorCode_NoFindServiceHandleFunc
+		httpResult.Message = fmt.Sprintf("[Handle Http] no found handle %s", args.MsgName)
+		httpResult.Data = nil
 	}
+	reply.ContentType = "application/json"
+	reply.Body, err = json.Marshal(httpResult)
 	return nil
 }

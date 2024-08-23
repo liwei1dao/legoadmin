@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"fmt"
 	"legoadmin/comm"
 	"legoadmin/pb"
 	"net/http"
@@ -64,12 +65,17 @@ func (this *ginComp) api(c *engine.Context) {
 		body   []byte
 		params string
 		claims *comm.TokenClaims
-		resp   *HttpResult                  = &HttpResult{}
 		args   *pb.Rpc_GatewayHttpRouteReq  = pools.GetForType(httpReqTyoe).(*pb.Rpc_GatewayHttpRouteReq)
 		reply  *pb.Rpc_GatewayHttpRouteResp = pools.GetForType(httpRespTyoe).(*pb.Rpc_GatewayHttpRouteResp)
 		ok     bool
 		err    error
 	)
+
+	defer func() {
+		pools.PutForType(httpReqTyoe, args)
+		pools.PutForType(httpRespTyoe, reply)
+	}()
+
 	fullPath := c.Request.URL.Path
 	// 移除开头的 '/'
 	if len(fullPath) > 0 && fullPath[0] == '/' {
@@ -80,41 +86,45 @@ func (this *ginComp) api(c *engine.Context) {
 	if fullPath != "api/login" {
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" {
-			resp.Code = pb.ErrorCode_TokenInvalid
-			resp.Message = pb.ErrorCode_TokenInvalid.String()
-			c.JSON(http.StatusBadRequest, resp)
+			c.JSON(http.StatusOK, &comm.HttpResult{
+				Code:    pb.ErrorCode_TokenInvalid,
+				Message: pb.ErrorCode_TokenInvalid.String(),
+			})
 			return
 		}
 		token, err := jwt.ParseWithClaims(tokenString, &comm.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(this.options.ApiKey), nil
 		})
 		if err != nil || !token.Valid {
-			resp.Code = pb.ErrorCode_TokenInvalid
-			resp.Message = "Invalid token"
-			c.JSON(http.StatusBadRequest, resp)
+			c.JSON(http.StatusOK, &comm.HttpResult{
+				Code:    pb.ErrorCode_TokenInvalid,
+				Message: "Invalid token",
+			})
 			return
 		}
 
 		claims, ok = token.Claims.(*comm.TokenClaims)
 		if !ok {
-			resp.Code = pb.ErrorCode_TokenInvalid
-			resp.Message = "Invalid token claims"
-			c.JSON(http.StatusBadRequest, resp)
+			c.JSON(http.StatusOK, &comm.HttpResult{
+				Code:    pb.ErrorCode_TokenInvalid,
+				Message: "Invalid token claims",
+			})
 			return
 		}
-		c.Set("account", claims.Account)
-		c.Set("identity", claims.Identity)
+		args.Meta = map[string]string{
+			comm.HttpContext_UserId:   claims.Account,
+			comm.HttpContext_Identity: fmt.Sprintf("%d", claims.Identity),
+		}
 	}
 
 	if body, err = c.GetRawData(); err != nil {
-		resp.Code = pb.ErrorCode_ReqParameterError
-		resp.Message = err.Error()
-		c.JSON(http.StatusOK, resp)
+		c.JSON(http.StatusOK, &comm.HttpResult{
+			Code:    pb.ErrorCode_ReqParameterError,
+			Message: err.Error(),
+		})
 		this.module.Errorln(err)
 		return
 	}
-
-	args.UserId = claims.Account
 	args.MsgName = fullPath
 	args.Message = body
 	stime := time.Now()
@@ -130,16 +140,5 @@ func (this *ginComp) api(c *engine.Context) {
 		log.Field{Key: "req", Value: params},
 		log.Field{Key: "reply", Value: reply.String()},
 	)
-	if reply.ErrorData != nil {
-		resp.Code = reply.ErrorData.Code
-		resp.Message = reply.ErrorData.Code.String()
-		c.JSON(http.StatusOK, resp)
-		return
-	} else {
-		resp.Code = pb.ErrorCode_Success
-		resp.Message = pb.ErrorCode_Success.String()
-		resp.Data, _ = reply.Data.UnmarshalNew()
-		c.JSON(http.StatusOK, resp)
-		return
-	}
+	c.RenderForBytes(http.StatusOK, "application/json", reply.Body)
 }

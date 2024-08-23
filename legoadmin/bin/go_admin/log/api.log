@@ -1,0 +1,11 @@
+2024/08/21 10:58:29.869	INFO	sys log Init success !
+2024/08/21 10:58:29.883	INFO	sys event Init success !
+2024/08/21 10:58:29.891	INFO	sys rpc Init success !
+2024/08/21 10:58:29.908	INFO	init sys.db success!
+2024/08/21 10:58:29.908	INFO	服务[api-cr2lfl8leif3di5pbhmg] 初始化完成!
+2024/08/21 10:58:29.908	DEBUG	[sys.rpc]	注册服务!	func:Rpc_GatewayHttpRoute
+2024/08/21 10:58:29.909	INFO	服务[api-cr2lfl8leif3di5pbhmg:1.0.0.0] 启动完成!
+2024/08/21 10:58:29.922	DEBUG	启动模块【api】
+2024/08/21 10:58:29.923	DEBUG	[sys.rpc]	TcpConnPool Start Listen !	Endpoints:["127.0.0.1:8101"]
+2024/08/21 10:58:29.927	DEBUG	[sys.rpc]	发现节点!	nodes:{"tag":"admin","type":"gateway","id":"gateway-cr2lfl8leif2cb63eltg","version":"1.0.0.0","addr":"127.0.0.1:8001","meta":{}}
+2024/08/21 10:58:29.929	DEBUG	[sys.rpc]	发现节点!	nodes:[{"tag":"admin","type":"api","id":"api-cr2lfl8leif3di5pbhmg","version":"1.0.0.0","addr":"127.0.0.1:8101","meta":{}}]

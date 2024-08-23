@@ -63,7 +63,8 @@ const (
 
 //session 缓存数据Key
 const (
-	HttpContext_UserId = "userid"
+	HttpContext_UserId   = "userid"
+	HttpContext_Identity = "identity"
 )
 
 //对象池

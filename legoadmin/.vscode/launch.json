@@ -20,11 +20,27 @@
             "showGlobalVariables": true,
             "env": {}, //可以用来配置调试启动时所用的环境变
         },
+        {
+            "name": "api",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/services/api", //配置Go项目启动文件路径，即main函数所在的.go文件的路径,${workspaceRoot}代表项目的根目录,也就是 /bin /pkg /src这三个文件夹所在的目录
+            "args": [
+                "-conf",
+                "./conf/api.yaml"
+            ],
+            "cwd": "${workspaceFolder}/bin/go_admin", //设置工作目录
+            "internalConsoleOptions": "openOnSessionStart",
+            "output": "${workspaceFolder}/bin/vsdebug_api", //设置vscode调试时生成文件的路径
+            "showGlobalVariables": true,
+            "env": {}, //可以用来配置调试启动时所用的环境变
+        },
     ],
     "compounds": [
         {
             "name": "All",
-            "configurations": ["gateway"]
+            "configurations": ["gateway","api"]
         }
     ]
 }

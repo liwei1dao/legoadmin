@@ -8,6 +8,7 @@ import (
 	"legoadmin/modules"
 
 	"github.com/liwei1dao/lego/core"
+	"github.com/liwei1dao/lego/sys/httppool"
 )
 
 func NewModule() core.IModule {
@@ -17,6 +18,7 @@ func NewModule() core.IModule {
 
 type Api struct {
 	modules.ModuleBase
+	pool    httppool.ISys
 	api     *apiComp
 	model   *modelComp
 	options *Options
@@ -32,6 +34,14 @@ func (this *Api) Init(service core.IService, module core.IModule, options core.I
 	this.options = options.(*Options)
 	if err = this.ModuleBase.Init(service, module, options); err != nil {
 		return
+	}
+	if this.pool, err = httppool.NewSys(
+		httppool.SetMaxIdleConns(5),
+		httppool.SetMaxIdleConnsPerHost(1),
+		httppool.SetIdleConnTimeout(15),
+		httppool.SetRequestTimeout(3),
+	); err != nil {
+		this.Errorln(err)
 	}
 	return
 }

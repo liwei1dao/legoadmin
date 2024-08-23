@@ -43,12 +43,6 @@ type (
 		DisConnect(a IAgent)
 		LoginNotice(a IAgent)
 	}
-
-	HttpResult struct {
-		Code    pb.ErrorCode `json:"code"`
-		Message string       `json:"message"`
-		Data    interface{}  `json:"data"`
-	}
 )
 
 // 设置跨域

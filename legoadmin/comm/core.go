@@ -58,6 +58,12 @@ type IUserContext interface {
 	Clone(ctx context.Context) (session IUserContext) //克隆
 }
 
+type HttpResult struct {
+	Code    pb.ErrorCode `json:"code"`
+	Message string       `json:"message"`
+	Data    interface{}  `json:"data"`
+}
+
 // Claims struct to define JWT claims
 type TokenClaims struct {
 	Account  string      `json:"account"`

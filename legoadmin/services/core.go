@@ -1,6 +1,11 @@
 package services
 
-import "github.com/liwei1dao/lego/utils/mapstructure"
+import (
+	"legoadmin/comm"
+	"reflect"
+
+	"github.com/liwei1dao/lego/utils/mapstructure"
+)
 
 // 组件参数
 type (
@@ -8,6 +13,10 @@ type (
 	RouteCompOptions struct {
 		MaxTime int32 //路由执行任务 超时警告
 	}
+)
+
+var (
+	httpResultTyoe reflect.Type = reflect.TypeOf(&comm.HttpResult{})
 )
 
 func (this *RouteCompOptions) LoadConfig(settings map[string]interface{}) (err error) {

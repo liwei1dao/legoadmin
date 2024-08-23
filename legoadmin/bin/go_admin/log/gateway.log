@@ -1,7 +1,8 @@
-2024/08/20 18:22:31.279	INFO	sys log Init success !
-2024/08/20 18:22:31.293	INFO	sys event Init success !
-2024/08/20 18:22:35.439	INFO	sys rpc Init success !
-2024/08/20 18:22:35.440	INFO	服务[gateway-cr26spoleif3ob5oua2g] 初始化完成!
-2024/08/20 18:22:35.440	INFO	服务[gateway-cr26spoleif3ob5oua2g:1.0.0.0] 启动完成!
-2024/08/20 18:22:35.441	DEBUG	[sys.rpc]	TcpConnPool Start Listen !	Endpoints:["127.0.0.1:9100"]
-2024/08/20 18:22:35.452	DEBUG	[sys.rpc]	发现节点!	nodes:[{"tag":"admin","type":"gateway","id":"gateway-cr26spoleif3ob5oua2g","version":"1.0.0.0","addr":"127.0.0.1:9100","meta":{}}]
+2024/08/21 10:58:29.336	INFO	sys log Init success !
+2024/08/21 10:58:29.351	INFO	sys event Init success !
+2024/08/21 10:58:29.360	INFO	sys rpc Init success !
+2024/08/21 10:58:29.361	INFO	服务[gateway-cr2lfl8leif2cb63eltg] 初始化完成!
+2024/08/21 10:58:29.361	INFO	服务[gateway-cr2lfl8leif2cb63eltg:1.0.0.0] 启动完成!
+2024/08/21 10:58:29.361	DEBUG	[sys.rpc]	TcpConnPool Start Listen !	Endpoints:["127.0.0.1:8001"]
+2024/08/21 10:58:29.371	DEBUG	[sys.rpc]	发现节点!	nodes:[{"tag":"admin","type":"gateway","id":"gateway-cr2lfl8leif2cb63eltg","version":"1.0.0.0","addr":"127.0.0.1:8001","meta":{}}]
+2024/08/21 10:58:29.929	DEBUG	[sys.rpc]	发现节点!	nodes:[{"tag":"admin","type":"api","id":"api-cr2lfl8leif3di5pbhmg","version":"1.0.0.0","addr":"127.0.0.1:8101","meta":{}}]
