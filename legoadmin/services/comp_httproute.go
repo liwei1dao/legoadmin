@@ -15,8 +15,6 @@ import (
 	"github.com/liwei1dao/lego/core/cbase"
 	"github.com/liwei1dao/lego/sys/log"
 	"github.com/liwei1dao/lego/sys/pools"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // 用户协议处理函数注册的反射对象
@@ -121,10 +119,9 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 				log.Field{Key: "reply", Value: reply.String()},
 			)
 		} else {
-			resp := handlereturn[0].Interface().(proto.Message)
 			httpResult.Code = pb.ErrorCode_Success
 			httpResult.Message = "Success"
-			httpResult.Data, _ = anypb.New(resp)
+			httpResult.Data = handlereturn[0].Interface()
 			nt := time.Since(stime).Milliseconds()
 			if this.options.MaxTime == 0 || nt < int64(this.options.MaxTime) {
 				log.Debug("[Handle Http]",
