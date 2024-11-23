@@ -95,6 +95,11 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 
+linter:
+  rules:
+    prefer_const_constructors: false # 禁用 const 提示
+    unused_import: false             # 禁用未使用导入的提示
+
 flutter_intl:
   enabled: true
   class_name: Lang
