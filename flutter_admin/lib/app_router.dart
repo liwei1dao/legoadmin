@@ -1,6 +1,7 @@
 import 'package:flutter_admin/providers/user_data_provider.dart';
 import 'package:flutter_admin/views/screens/dashboard_screen.dart';
 import 'package:flutter_admin/views/screens/error_screen.dart';
+import 'package:flutter_admin/views/screens/login_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class RouteUri {
@@ -51,6 +52,13 @@ GoRouter appRouter(UserDataProvider userDataProvider) {
         pageBuilder: (context, state) => NoTransitionPage<void>(
           key: state.pageKey,
           child: const DashboardScreen(),
+        ),
+      ),
+      GoRoute(
+        path: RouteUri.login,
+        pageBuilder: (context, state) => NoTransitionPage<void>(
+          key: state.pageKey,
+          child: const LoginScreen(),
         ),
       ),
     ],
