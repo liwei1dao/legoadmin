@@ -6,6 +6,7 @@ import 'package:flutter_admin/master_layout_config.dart';
 import 'package:flutter_admin/providers/app_preferences_provider.dart';
 import 'package:flutter_admin/theme/theme_extensions/app_color_scheme.dart';
 import 'package:flutter_admin/theme/theme_extensions/app_sidebar_theme.dart';
+import 'package:flutter_admin/views/widgets/portal_master_layout/sidebar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -51,18 +52,6 @@ class PortalMasterLayout extends StatelessWidget {
         ? _sidebar(context)
         : null);
     return Scaffold(
-      appBar: AppBar(),
-    );
-  }
-
-  Widget _sidebar(BuildContext context) {
-    final mediaQueryData = MediaQuery.of(context);
-    final themeData = Theme.of(context);
-    final drawer = (mediaQueryData.size.width <= kScreenWidthLg
-        ? _sidebar(context)
-        : null);
-
-    return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: (drawer != null),
         title: ResponsiveAppBarTitle(
@@ -92,6 +81,18 @@ class PortalMasterLayout extends StatelessWidget {
       floatingActionButtonLocation: floatingActionButtonLocation,
       floatingActionButtonAnimator: floatingActionButtonAnimator,
       persistentFooterButtons: persistentFooterButtons,
+    );
+  }
+
+  Widget _sidebar(BuildContext context) {
+    final goRouter = GoRouter.of(context);
+
+    return Sidebar(
+      autoSelectMenu: autoSelectMenu,
+      selectedMenuUri: selectedMenuUri,
+      onAccountButtonPressed: () => goRouter.go(RouteUri.myProfile),
+      onLogoutButtonPressed: () => goRouter.go(RouteUri.logout),
+      sidebarConfigs: sidebarMenuConfigs,
     );
   }
 

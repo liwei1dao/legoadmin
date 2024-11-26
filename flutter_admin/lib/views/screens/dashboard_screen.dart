@@ -1,8 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_admin/constants/dimens.dart';
 import 'package:flutter_admin/generated/l10n.dart';
+import 'package:flutter_admin/theme/theme_extensions/app_button_theme.dart';
 import 'package:flutter_admin/theme/theme_extensions/app_color_scheme.dart';
 import 'package:flutter_admin/theme/theme_extensions/app_data_table_theme.dart';
+import 'package:flutter_admin/views/widgets/card_elements.dart';
 import 'package:flutter_admin/views/widgets/portal_master_layout/portal_master_layout.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -13,6 +17,14 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final _dataTableHorizontalScrollController = ScrollController();
+  @override
+  void dispose() {
+    _dataTableHorizontalScrollController.dispose();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = Lang.of(context);
@@ -49,9 +61,132 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     iconColor: Colors.black12,
                     width: summaryCardWidth,
                   ),
+                  SummaryCard(
+                    title: lang.todaySales,
+                    value: '+12%',
+                    icon: Icons.ssid_chart_rounded,
+                    backgroundColor: appColorScheme.success,
+                    textColor: themeData.colorScheme.onPrimary,
+                    iconColor: Colors.black12,
+                    width: summaryCardWidth,
+                  ),
+                  SummaryCard(
+                    title: lang.newUsers(2),
+                    value: '44',
+                    icon: Icons.group_add_rounded,
+                    backgroundColor: appColorScheme.warning,
+                    textColor: appColorScheme.buttonTextBlack,
+                    iconColor: Colors.black12,
+                    width: summaryCardWidth,
+                  ),
+                  SummaryCard(
+                    title: lang.pendingIssues(2),
+                    value: '0',
+                    icon: Icons.report_gmailerrorred_rounded,
+                    backgroundColor: appColorScheme.error,
+                    textColor: themeData.colorScheme.onPrimary,
+                    iconColor: Colors.black12,
+                    width: summaryCardWidth,
+                  ),
                 ],
               );
             }),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: kDefaultPadding),
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CardHeader(
+                    title: lang.recentOrders(2),
+                    showDivider: false,
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final double dataTableWidth =
+                            max(kScreenWidthMd, constraints.maxWidth);
+                        return Scrollbar(
+                          controller: _dataTableHorizontalScrollController,
+                          thumbVisibility: true,
+                          trackVisibility: true,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: _dataTableHorizontalScrollController,
+                            child: SizedBox(
+                              width: dataTableWidth,
+                              child: Theme(
+                                data: themeData.copyWith(
+                                  cardTheme: appDataTableTheme.cardTheme,
+                                  dataTableTheme:
+                                      appDataTableTheme.dataTableThemeData,
+                                ),
+                                child: DataTable(
+                                  showCheckboxColumn: false,
+                                  showBottomBorder: true,
+                                  columns: const [
+                                    DataColumn(
+                                        label: Text('No.'), numeric: true),
+                                    DataColumn(label: Text('Date')),
+                                    DataColumn(label: Text('Item')),
+                                    DataColumn(
+                                        label: Text('Price'), numeric: true),
+                                  ],
+                                  rows: List.generate(5, (index) {
+                                    return DataRow.byIndex(
+                                      index: index,
+                                      cells: [
+                                        DataCell(Text('#${index + 1}')),
+                                        const DataCell(Text('2022-06-30')),
+                                        DataCell(Text('Item ${index + 1}')),
+                                        DataCell(
+                                            Text('${Random().nextInt(10000)}')),
+                                      ],
+                                    );
+                                  }),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      height: 40.0,
+                      width: 120.0,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style:
+                            themeData.extension<AppButtonTheme>()!.infoElevated,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  right: kDefaultPadding * 0.5),
+                              child: Icon(
+                                Icons.visibility_rounded,
+                                size:
+                                    (themeData.textTheme.labelLarge!.fontSize! +
+                                        4.0),
+                              ),
+                            ),
+                            const Text('View All'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
           )
         ],
       ),
