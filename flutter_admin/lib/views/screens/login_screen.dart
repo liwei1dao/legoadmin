@@ -1,5 +1,6 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_admin/api/api_login.dart';
 import 'package:flutter_admin/app_router.dart';
 import 'package:flutter_admin/constants/dimens.dart';
 import 'package:flutter_admin/generated/l10n.dart';
@@ -37,20 +38,36 @@ class _LoginScreenState extends State<LoginScreen> {
       _formKey.currentState!.save();
 
       setState(() => _isFormLoading = true);
-
-      Future.delayed(const Duration(seconds: 1), () async {
-        if (_formData.username != 'admin' || _formData.password != 'admin') {
-          onError.call('Invalid username or password.');
-        } else {
+      ApiLogin.login(
+        context,
+        _formData.username,
+        _formData.password,
+        onSuccess: () async {
           await userDataProvider.setUserDataAsync(
             username: 'Admin ABC',
             userProfileImageUrl: 'https://picsum.photos/id/1005/300/300',
           );
-
+          setState(() => _isFormLoading = false);
           onSuccess.call();
-        }
-        setState(() => _isFormLoading = false);
-      });
+        },
+        onError: (e) {
+          setState(() => _isFormLoading = false);
+          onError.call(e.toString());
+        },
+      );
+      // Future.delayed(const Duration(seconds: 1), () async {
+      // if (_formData.username != 'admin' || _formData.password != 'admin') {
+      //   onError.call('Invalid username or password.');
+      // } else {
+      //   await userDataProvider.setUserDataAsync(
+      //     username: 'Admin ABC',
+      //     userProfileImageUrl: 'https://picsum.photos/id/1005/300/300',
+      //   );
+
+      //   onSuccess.call();
+      // }
+      //   setState(() => _isFormLoading = false);
+      // });
     }
   }
 
