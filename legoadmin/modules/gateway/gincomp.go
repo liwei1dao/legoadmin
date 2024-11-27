@@ -1,13 +1,11 @@
 package gateway
 
 import (
-	"fmt"
 	"legoadmin/comm"
 	"legoadmin/pb"
 	"net/http"
 	"time"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/liwei1dao/lego/core"
 	"github.com/liwei1dao/lego/core/cbase"
 	"github.com/liwei1dao/lego/sys/gin"
@@ -37,7 +35,7 @@ func (this *ginComp) Init(service core.IService, module core.IModule, comp core.
 	//游戏业务逻辑处理
 	this.gin.GET("/ws", this.ws)
 	//api 业务请求
-	this.gin.POST("/api/*path", this.api)
+	this.gin.POST("/web/:param1/:param2", this.api)
 	return
 }
 
@@ -62,13 +60,12 @@ func (this *ginComp) ws(c *engine.Context) {
 // 后台接口转发
 func (this *ginComp) api(c *engine.Context) {
 	var (
-		body   []byte
-		params string
-		claims *comm.TokenClaims
-		args   *pb.Rpc_GatewayHttpRouteReq  = pools.GetForType(httpReqTyoe).(*pb.Rpc_GatewayHttpRouteReq)
-		reply  *pb.Rpc_GatewayHttpRouteResp = pools.GetForType(httpRespTyoe).(*pb.Rpc_GatewayHttpRouteResp)
-		ok     bool
-		err    error
+		param1, param2 string
+		body           []byte
+		params         string
+		args           *pb.Rpc_GatewayHttpRouteReq  = pools.GetForType(httpReqTyoe).(*pb.Rpc_GatewayHttpRouteReq)
+		reply          *pb.Rpc_GatewayHttpRouteResp = pools.GetForType(httpRespTyoe).(*pb.Rpc_GatewayHttpRouteResp)
+		err            error
 	)
 
 	defer func() {
@@ -76,46 +73,8 @@ func (this *ginComp) api(c *engine.Context) {
 		pools.PutForType(httpRespTyoe, reply)
 	}()
 
-	fullPath := c.Request.URL.Path
-	// 移除开头的 '/'
-	if len(fullPath) > 0 && fullPath[0] == '/' {
-		fullPath = fullPath[1:]
-	}
-
-	//非登录 验证token
-	if fullPath != "api/login" {
-		tokenString := c.GetHeader("Authorization")
-		if tokenString == "" {
-			c.JSON(http.StatusOK, &comm.HttpResult{
-				Code:    pb.ErrorCode_TokenInvalid,
-				Message: pb.ErrorCode_TokenInvalid.String(),
-			})
-			return
-		}
-		token, err := jwt.ParseWithClaims(tokenString, &comm.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-			return []byte(this.options.ApiKey), nil
-		})
-		if err != nil || !token.Valid {
-			c.JSON(http.StatusOK, &comm.HttpResult{
-				Code:    pb.ErrorCode_TokenInvalid,
-				Message: "Invalid token",
-			})
-			return
-		}
-
-		claims, ok = token.Claims.(*comm.TokenClaims)
-		if !ok {
-			c.JSON(http.StatusOK, &comm.HttpResult{
-				Code:    pb.ErrorCode_TokenInvalid,
-				Message: "Invalid token claims",
-			})
-			return
-		}
-		args.Meta = map[string]string{
-			comm.HttpContext_UserId:   claims.Account,
-			comm.HttpContext_Identity: fmt.Sprintf("%d", claims.Identity),
-		}
-	}
+	param1 = c.Param("param1")
+	param2 = c.Param("param2")
 
 	if body, err = c.GetRawData(); err != nil {
 		c.JSON(http.StatusOK, &comm.HttpResult{
@@ -125,10 +84,10 @@ func (this *ginComp) api(c *engine.Context) {
 		this.module.Errorln(err)
 		return
 	}
-	args.MsgName = fullPath
+	args.MsgName = param2
 	args.Message = body
 	stime := time.Now()
-	if err = this.module.Service().RpcCall(c, comm.Service_Api, string(comm.Rpc_GatewayHttpRoute), args, reply); err != nil {
+	if err = this.module.Service().RpcCall(c, param1, string(comm.Rpc_GatewayHttpRoute), args, reply); err != nil {
 		this.module.Error("[API]",
 			log.Field{Key: "req", Value: params},
 			log.Field{Key: "err", Value: err.Error()},
@@ -140,5 +99,5 @@ func (this *ginComp) api(c *engine.Context) {
 		log.Field{Key: "req", Value: params},
 		log.Field{Key: "reply", Value: reply.String()},
 	)
-	c.RenderForBytes(http.StatusOK, "application/json", reply.Body)
+	c.RenderForBytes(http.StatusOK, reply.ContentType, reply.Body)
 }

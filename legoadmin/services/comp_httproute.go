@@ -52,7 +52,9 @@ func (this *SCompHttpRoute) NewOptions() (options core.ICompOptions) {
 func (this *SCompHttpRoute) Init(service core.IService, comp core.IServiceComp, options core.ICompOptions) (err error) {
 	err = this.ServiceCompBase.Init(service, comp, options)
 	this.service = service.(comm.IService)
+	this.options = options.(*RouteCompOptions)
 	this.msghandles = make(map[string]*msghandle)
+	pools.InitTypes(httpResultTyoe)
 	return err
 }
 
@@ -77,7 +79,7 @@ func (this *SCompHttpRoute) RegisterRoute(methodName string, comp reflect.Value,
 		handle:  handele,
 	}
 	//注册类型池
-	pools.InitType(msg)
+	pools.InitTypes(msg)
 }
 
 // Rpc_GatewayRoute服务接口的接收函数
@@ -116,7 +118,7 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 				log.Field{Key: "m", Value: args.MsgName},
 				log.Field{Key: "meta", Value: args.Meta},
 				log.Field{Key: "req", Value: msg},
-				log.Field{Key: "reply", Value: reply.String()},
+				log.Field{Key: "result", Value: httpResult},
 			)
 		} else {
 			httpResult.Code = pb.ErrorCode_Success
@@ -129,7 +131,7 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 					log.Field{Key: "m", Value: args.MsgName},
 					log.Field{Key: "meta", Value: args.Meta},
 					log.Field{Key: "req", Value: msg},
-					log.Field{Key: "reply", Value: reply.String()},
+					log.Field{Key: "result", Value: httpResult},
 				)
 			} else {
 				log.Error("[Handle Http] 执行时间过长",
@@ -137,12 +139,12 @@ func (this *SCompHttpRoute) Rpc_GatewayHttpRoute(ctx context.Context, args *pb.R
 					log.Field{Key: "m", Value: args.MsgName},
 					log.Field{Key: "meta", Value: args.Meta},
 					log.Field{Key: "req", Value: msg},
-					log.Field{Key: "reply", Value: reply.String()},
+					log.Field{Key: "result", Value: httpResult},
 				)
 			}
 		}
 	} else { //未找到消息处理函数
-		log.Errorf("[Handle Http] no found handle %s", args.MsgName)
+		log.Errorf("[Handle Http] no found handle:%s", args.MsgName)
 		httpResult.Code = pb.ErrorCode_NoFindServiceHandleFunc
 		httpResult.Message = fmt.Sprintf("[Handle Http] no found handle %s", args.MsgName)
 		httpResult.Data = nil

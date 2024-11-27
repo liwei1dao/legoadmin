@@ -16,7 +16,7 @@ sys:
     DiscoveryInterval: 5                                                        #服务发现间隔时间
     OutTime: 0 #消息超时时间
   db: #存储系统
-    MysqlDNS: root:li13451234@tcp(127.0.0.1:3306)/wuman?charset=utf8mb4&parseTime=True&loc=Local
+    MysqlDNS: root:li13451234@tcp(127.0.0.1:3306)/admin?charset=utf8mb4&parseTime=True&loc=Local
     RedisAddr: ["localhost:6379"] 
     RedisPassword: li13451234
     RedisDB: 0
@@ -25,3 +25,5 @@ sys:
 modules:
   api:
     Debug: true
+    AdninAccount: "admin"
+    AdninPassword: "admin"

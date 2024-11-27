@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"legoadmin/modules/gateway"
 	"legoadmin/services"
 
 	"github.com/liwei1dao/lego"
@@ -26,7 +27,9 @@ func main() {
 	s.OnInstallComp( //装备组件
 
 	)
-	lego.Run(s) //运行模块
+	lego.Run(s, //运行模块
+		gateway.NewModule(),
+	)
 
 }
 

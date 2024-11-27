@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class DioUtils {
   // 创建 Dio 实例
   static final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://127.0.0.1:7891/api', // 设置基础 URL
+    baseUrl: 'http://127.0.0.1:8081/api', // 设置基础 URL
     connectTimeout: Duration(milliseconds: 5000), // 连接超时
     receiveTimeout: Duration(milliseconds: 5000), // 响应超时
   ));

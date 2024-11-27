@@ -104,7 +104,7 @@ func (this *MCompHttpGate) reflectionRouteHandle(typ reflect.Type, method reflec
 	}
 
 	//注册路由函数
-	this.scomp.RegisterRoute(fmt.Sprintf("%s/%s", this.module.GetType(), strings.ToLower(mname)), reflect.ValueOf(this.comp), agrType, method)
+	this.scomp.RegisterRoute(fmt.Sprintf("%s.%s", this.module.GetType(), strings.ToLower(mname)), reflect.ValueOf(this.comp), agrType, method)
 
 	return true
 }

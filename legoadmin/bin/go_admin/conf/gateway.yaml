@@ -26,5 +26,6 @@ sys:
 #模块配置
 modules:
   gateway:
-    ListenPort: 9100
+    ListenPort: 8081
+    GinDebug: true
     Debug: true

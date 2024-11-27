@@ -10,6 +10,7 @@ import (
 	"github.com/liwei1dao/lego/base/cluster"
 	"github.com/liwei1dao/lego/core"
 	"github.com/liwei1dao/lego/sys/log"
+	"github.com/liwei1dao/lego/sys/pools"
 )
 
 func NewModule() core.IModule {
@@ -19,10 +20,10 @@ func NewModule() core.IModule {
 
 type Gateway struct {
 	modules.ModuleBase
-	options   *Options
-	service   cluster.IClusterService //rpcx服务接口 主要client->server
-	agents    *AgentMgrComp           //客户端websocket连接管理
-	wsservice *ginComp                //websocket服务 监听websocket连接
+	options *Options
+	service cluster.IClusterService //rpcx服务接口 主要client->server
+	agents  *AgentMgrComp           //客户端websocket连接管理
+	gin     *ginComp                //websocket服务 监听websocket连接
 }
 
 // GetType 获取模块服务类型
@@ -47,6 +48,7 @@ func (this *Gateway) Init(service core.IService, module core.IModule, options co
 	}
 	this.options = options.(*Options)
 	this.service = service.(cluster.IClusterService)
+	pools.InitTypes(gatewayReqTyoe, gatewayRespTyoe, httpReqTyoe, httpRespTyoe)
 	return
 }
 
@@ -78,7 +80,7 @@ func (this *Gateway) Start() (err error) {
 func (this *Gateway) OnInstallComp() {
 	this.ModuleBase.OnInstallComp()
 	this.agents = this.RegisterComp(new(AgentMgrComp)).(*AgentMgrComp)
-	this.wsservice = this.RegisterComp(new(ginComp)).(*ginComp)
+	this.gin = this.RegisterComp(new(ginComp)).(*ginComp)
 }
 
 // Connect 有新的连接对象进入

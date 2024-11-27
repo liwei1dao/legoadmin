@@ -85,7 +85,7 @@ func (this *UserContext) SendMsg(mainType, subType string, msg proto.Message) (e
 	// log.Debugf("SendMsg to UserId:[%s] Data: %v", this.UserId, msg)
 	data, _ := anypb.New(msg)
 	this.msgqueue = append(this.msgqueue, &pb.UserMessage{
-		MsgName: fmt.Sprintf("%s/%s", mainType, subType),
+		MsgName: fmt.Sprintf("%s.%s", mainType, subType),
 		Data:    data,
 	})
 	return

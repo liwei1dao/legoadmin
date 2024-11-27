@@ -90,7 +90,7 @@ func (this *SCompGateRoute) RegisterRoute(methodName string, comp reflect.Value,
 		handle:  handele,
 	}
 	//注册类型池
-	pools.InitType(msg)
+	pools.InitTypes(msg)
 }
 
 // RPC----------------------------------------------------------------------------------------------------------------------
